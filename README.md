@@ -32,7 +32,7 @@ There are 3 settings:
 
 `killBlueIrisProcessesDuringUpdate` -- (Default: `true`) On some systems with many cameras, Blue Iris cannot stop itself gracefully, and it maxes out the CPU while it shuts down over several minutes.  This can cause updates to fail.  This setting allows the helper service to kill Blue Iris quickly the moment an update begins.
 
-`backupUpdateFiles` -- (Default: `true`) If `true`, the helper service will automatically make backups of update.exe, saving them in the Blue Iris directory with names like "update64_4.5.3.3.exe" or "update32_4.5.3.3".
+`backupUpdateFiles` -- (Default: `true`) If `true`, the helper service will automatically make backups of update.exe, saving them in the Blue Iris directory with names like "update64_4.5.3.3.exe" or "update32_4.5.3.3.exe".
 
 `logVerbose` -- (Default: `false`) For debugging purposes, you may turn on verbose logging.  This will cause the service to write a lot of information to the log file, and should only be used if troubleshooting a problem.
 
