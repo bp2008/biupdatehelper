@@ -36,4 +36,6 @@ There are 3 settings:
 
 ## Issues
 
+I am aware this program uses more CPU time than it necessarily deserves.  I plan to do an optimization pass later, but current usage is not too significant so this is not a high priority for me.
+
 Please report any defects using the project's Issues tab above.
