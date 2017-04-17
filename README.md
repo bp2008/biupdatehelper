@@ -8,7 +8,7 @@ This tool solves two common problems with Blue Iris updates.
 
 ## Installation
 
-1) Download the latest release from the release section.
+1) Download the latest release from the **releases** section above. **NOT the green Clone or download button**
 2) Extract to a directory of your choice.
 3) Run `Install_Service.bat`.  The service will now auto-start when your computer boots.
 4) To start the service without rebooting, run `Start_Service.bat`
