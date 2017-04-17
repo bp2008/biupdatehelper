@@ -41,7 +41,6 @@ namespace BiUpdateHelper
 
 			settings = new BiUpdateHelperSettings();
 			settings.Load();
-			settings.SaveDefaultIfNoExist();
 
 			thrMain = new Thread(UpdateWatch);
 			thrMain.Name = "Main Logic";

@@ -14,12 +14,23 @@ namespace BiUpdateHelper
 		/// </summary>
 		static void Main()
 		{
-			ServiceBase[] ServicesToRun;
-			ServicesToRun = new ServiceBase[]
+			BiUpdateHelperSettings settings = new BiUpdateHelperSettings();
+			settings.Load();
+			settings.SaveDefaultIfNoExist();
+
+			if (Environment.UserInteractive)
 			{
+				System.Windows.Forms.Application.Run(new ServiceManager());
+			}
+			else
+			{
+				ServiceBase[] ServicesToRun;
+				ServicesToRun = new ServiceBase[]
+				{
 				new MainSvc()
-			};
-			ServiceBase.Run(ServicesToRun);
+				};
+				ServiceBase.Run(ServicesToRun);
+			}
 		}
 	}
 }
