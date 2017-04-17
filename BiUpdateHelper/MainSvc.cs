@@ -66,110 +66,79 @@ namespace BiUpdateHelper
 						// Build a list of unique directories that have an active blueiris.exe.
 						// There is not likely to be more than one directory, though a single directory 
 						// can easily have two blueiris.exe (service and GUI).
-						List<BiUpdateMapping> biUpdateMap = new List<BiUpdateMapping>();
+						List<BiUpdateMapping> biUpdateMap = GetUpdateInfo();
 
-						Process[] allProcs = Process.GetProcesses();
-						Process[] allBiProcs = allProcs.Where(p => string.Compare("blueiris", p.ProcessName, true) == 0).ToArray();
-						Verbose("Found " + allBiProcs.Length + " blueiris.exe processes");
-						HashSet<string> biPaths = new HashSet<string>();
-						foreach (Process p in allBiProcs)
+						if (biUpdateMap.Count == 0)
 						{
-							FileInfo fi = new FileInfo(GetPath(p));
-							string path = fi.Directory.FullName.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
-							if (!biPaths.Contains(path))
-							{
-								Verbose("Found path: " + path);
-								biPaths.Add(path);
-							}
-						}
-						foreach (string path in biPaths)
-						{
-							Process[] everythingInDir = allProcs.Where(p => GetPath(p).StartsWith(path)).ToArray();
-							Process[] updateProcs = everythingInDir.Where(p => p.ProcessName.ToLower().StartsWith("update")).ToArray();
-							Verbose("Found " + updateProcs.Length + " update processes running under path:" + path);
-							if (updateProcs.Length > 0)
-							{
-								Process[] biProcs = everythingInDir.Where(p => string.Compare("blueiris", p.ProcessName, true) == 0).ToArray();
-								BiUpdateMapping mapping = new BiUpdateMapping(biProcs, updateProcs);
-								biUpdateMap.Add(mapping);
-							}
-						}
-
-						if (biUpdateMap.Count > 0)
-						{
-							// Blue Iris is currently being updated.  Kill the blueiris.exe processes if configured to do so.
-							foreach (BiUpdateMapping mapping in biUpdateMap)
-							{
-								Verbose("Blue Iris update detected!");
-								if (settings.killBlueIrisProcessesDuringUpdate)
-								{
-									Verbose("Killing Blue Iris processes");
-									mapping.KillBiProcs();
-								}
-								Verbose("Waiting for update to complete");
-								mapping.WaitUntilUpdateProcsStop(TimeSpan.FromMinutes(5));
-							}
+							Verbose("No Blue Iris processes detected");
 						}
 						else
 						{
-							// Blue Iris is not being updated.
-							if (settings.backupUpdateFiles)
+							foreach (BiUpdateMapping mapping in biUpdateMap)
 							{
-								//Check for the existence of an update.exe file in any path that has blueiris.exe currently running.
-								foreach (string path in biPaths)
+								if (mapping.updateProcs.Length > 0)
 								{
-									Verbose("Backing up update files in path: " + path);
-									FileInfo fiBi = new FileInfo(path + "blueiris.exe");
-									if (fiBi.Exists)
+									// Blue Iris is currently being updated.  Kill the blueiris.exe processes if configured to do so.
+									Verbose("Blue Iris update detected in path: " + mapping.dirPath);
+									if (settings.killBlueIrisProcessesDuringUpdate)
 									{
-										FileInfo fiUpdate = new FileInfo(path + "update.exe");
-										if (fiUpdate.Exists)
+										Verbose("Killing Blue Iris processes");
+										mapping.KillBiProcs();
+									}
+									Verbose("Waiting for update to complete");
+									mapping.WaitUntilUpdateProcsStop(TimeSpan.FromMinutes(5));
+								}
+								else
+								{
+									// Blue Iris is not being updated in this directory.  Back up the update file if configured to do so.
+									if (!settings.backupUpdateFiles)
+										continue;
+
+									//Check for the existence of an update.exe file
+									FileInfo fiUpdate = new FileInfo(mapping.dirPath + "update.exe");
+									if (!fiUpdate.Exists)
+									{
+										Verbose("No update file to back up in path: " + mapping.dirPath);
+										continue;
+									}
+
+									Verbose("Backing up update file: " + fiUpdate.FullName);
+
+									// Get Blue Iris process(es) (necessary to learn if it is 64 or 32 bit)
+									string cpu_32_64 = Is64Bit(mapping.biProcs[0].process) ? "64" : "32";
+
+									// Get current Blue Iris version.
+									FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(mapping.biProcs[0].path);
+									string version = fvi.FileVersion;
+
+									FileInfo targetUpdateFile = new FileInfo(mapping.dirPath + "update" + cpu_32_64 + "_" + version + ".exe");
+									if (targetUpdateFile.Exists)
+									{
+										// A backed-up update file for the active Blue Iris version already exists, so we should do nothing now
+										Verbose("Target update file \"" + targetUpdateFile.FullName + "\" already exists.  Probably, the new update file hasn't been installed yet.");
+									}
+									else
+									{
+										// Find out if the file can be opened exclusively (meaning it is finished downloading, etc)
+										bool fileIsUnlocked = false;
+										try
 										{
-											// An update file exists with the default name.
-											Verbose("An update file exists with the default name");
-
-											// Get Blue Iris process(es) (necessary to learn if it is 64 or 32 bit)
-											Process[] biProcs = allBiProcs.Where(p => GetPath(p).StartsWith(path)).ToArray();
-											if (biProcs.Length > 0)
+											using (FileStream fs = new FileStream(fiUpdate.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
 											{
-												string cpu_32_64 = Is64Bit(biProcs[0]) ? "64" : "32";
-
-												// Get current Blue Iris version.
-												FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(GetPath(biProcs[0]));
-												string version = fvi.FileVersion;
-
-												FileInfo targetUpdateFile = new FileInfo(path + "update" + cpu_32_64 + "_" + version + ".exe");
-												Verbose("Target update file is: " + targetUpdateFile.FullName);
-												if (targetUpdateFile.Exists)
-												{
-													// A backed-up update file for the active Blue Iris version already exists, so we should do nothing now
-													Verbose("Target update file already exists");
-												}
-												else
-												{
-													// Find out if the file can be opened exclusively (meaning it is finished downloading, etc)
-													bool fileIsUnlocked = false;
-													try
-													{
-														using (FileStream fs = new FileStream(fiUpdate.FullName, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-														{
-															fileIsUnlocked = true;
-														}
-													}
-													catch (ThreadAbortException) { throw; }
-													catch (Exception) { }
-
-													if (fileIsUnlocked)
-													{
-														// This is a pretty good sign that the update is not curently being installed, so we should be safe to rename the update file.
-														Logger.Info("Renaming update file to: " + targetUpdateFile.FullName);
-														fiUpdate.MoveTo(targetUpdateFile.FullName);
-													}
-													else
-														Verbose("Update file could not be exclusively locked. Backup will not occur this iteration.");
-												}
+												fileIsUnlocked = true;
 											}
 										}
+										catch (ThreadAbortException) { throw; }
+										catch (Exception) { }
+
+										if (fileIsUnlocked)
+										{
+											// This is a pretty good sign that the update is not curently being installed, so we should be safe to rename the update file.
+											Logger.Info("Renaming update file to: " + targetUpdateFile.FullName);
+											fiUpdate.MoveTo(targetUpdateFile.FullName);
+										}
+										else
+											Verbose("Update file could not be exclusively locked. Backup will not occur this iteration.");
 									}
 								}
 							}
@@ -188,6 +157,55 @@ namespace BiUpdateHelper
 				Logger.Debug(ex);
 			}
 		}
+		private List<BiUpdateMapping> GetUpdateInfo()
+		{
+			List<RelatedProcessInfo> allBiProcs = new List<RelatedProcessInfo>();
+			List<RelatedProcessInfo> allUpdateProcs = new List<RelatedProcessInfo>();
+			List<string> biPaths;
+			{
+				Process[] allProcs = Process.GetProcesses();
+				HashSet<string> hsBiPaths = new HashSet<string>();
+				foreach (Process p in allProcs)
+				{
+					string name = p.ProcessName;
+					string nameLower = name.ToLower();
+					if (nameLower == "blueiris")
+					{
+						string path = GetPath(p);
+						if (path == null)
+						{
+							Logger.Info("Unable to get file path for process " + p.Id + ": " + name);
+							continue;
+						}
+						string dirPath = new FileInfo(path).Directory.FullName.TrimEnd('\\', '/') + Path.DirectorySeparatorChar;
+						if (!hsBiPaths.Contains(dirPath))
+							hsBiPaths.Add(dirPath);
+						allBiProcs.Add(new RelatedProcessInfo(p, name, path));
+					}
+					else if (nameLower.StartsWith("update"))
+					{
+						string path = GetPath(p);
+						if (path == null)
+						{
+							Logger.Info("Unable to get file path for process " + p.Id + ": " + name);
+							continue;
+						}
+						allUpdateProcs.Add(new RelatedProcessInfo(p, name, path));
+					}
+				}
+				biPaths = hsBiPaths.ToList();
+			}
+			List<BiUpdateMapping> biUpdateMap = new List<BiUpdateMapping>();
+			foreach (string path in biPaths)
+			{
+				RelatedProcessInfo[] biProcs = allBiProcs.Where(p => p.path.StartsWith(path)).ToArray();
+				RelatedProcessInfo[] updateProcs = allUpdateProcs.Where(p => p.path.StartsWith(path)).ToArray();
+				Verbose("Found " + biProcs.Length + " blue iris processes and " + updateProcs.Length + " update processes running under path: " + path);
+				biUpdateMap.Add(new BiUpdateMapping(biProcs, updateProcs, path));
+			}
+			return biUpdateMap;
+		}
+
 		private static string GetPath(Process p)
 		{
 			try
@@ -196,7 +214,7 @@ namespace BiUpdateHelper
 			}
 			catch (ThreadAbortException) { throw; }
 			catch (Exception) { }
-			return "";
+			return null;
 		}
 		private void Verbose(string str)
 		{
@@ -217,31 +235,46 @@ namespace BiUpdateHelper
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
 	}
+	public class RelatedProcessInfo
+	{
+		public Process process;
+		public string name;
+		public string path;
+		public RelatedProcessInfo(Process process, string name, string path)
+		{
+			this.process = process;
+			this.name = name;
+			this.path = path;
+		}
+	}
 	/// <summary>
 	/// Represents one or more blueiris.exe processes and one or more update processes that are all running from the same directory.
 	/// </summary>
 	public class BiUpdateMapping
 	{
-		public Process[] biProcs;
-		public Process[] updateProcs;
-		public BiUpdateMapping(Process[] biProcs, Process[] updateProcs)
+		public RelatedProcessInfo[] biProcs;
+		public RelatedProcessInfo[] updateProcs;
+		public string dirPath;
+		public BiUpdateMapping(RelatedProcessInfo[] biProcs, RelatedProcessInfo[] updateProcs, string dirPath)
 		{
 			this.biProcs = biProcs;
 			this.updateProcs = updateProcs;
+			this.dirPath = dirPath;
 		}
 
 		public void KillBiProcs()
 		{
-			foreach (Process p in biProcs)
+			foreach (RelatedProcessInfo rpi in biProcs)
 			{
 				try
 				{
-					p.Kill();
+					if (!rpi.process.HasExited)
+						rpi.process.Kill();
 				}
-				catch (ThreadAbortException ex) { throw; }
+				catch (ThreadAbortException) { throw; }
 				catch (Exception ex)
 				{
-					Logger.Debug(ex, "Unable to kill blueiris.exe process");
+					Logger.Debug(ex, "Unable to kill process: " + rpi.path);
 				}
 			}
 		}
@@ -255,9 +288,9 @@ namespace BiUpdateHelper
 			while (sw.Elapsed < timeout)
 			{
 				bool allUpdateProcsExited = true;
-				foreach (Process p in updateProcs)
+				foreach (RelatedProcessInfo rpi in updateProcs)
 				{
-					if (!p.HasExited)
+					if (!rpi.process.HasExited)
 					{
 						allUpdateProcsExited = false;
 						break;
@@ -265,6 +298,7 @@ namespace BiUpdateHelper
 				}
 				if (allUpdateProcsExited)
 					break;
+				Thread.Sleep(1000);
 			}
 		}
 	}
