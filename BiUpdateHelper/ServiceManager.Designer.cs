@@ -114,7 +114,7 @@
 			this.Controls.Add(this.lblService);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "ServiceManager";
-			this.Text = "BiUpdateHelper Service Manager";
+			this.Text = "BiUpdateHelper";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServiceManager_FormClosing);
 			this.Load += new System.EventHandler(this.ServiceManager_Load);
 			this.ResumeLayout(false);

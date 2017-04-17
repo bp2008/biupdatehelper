@@ -85,4 +85,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(SolutionDir)LICENSE" "$(TargetDir)LICENSE"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

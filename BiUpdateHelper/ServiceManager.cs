@@ -33,6 +33,7 @@ namespace BiUpdateHelper
 
 		private void ServiceManager_Load(object sender, EventArgs e)
 		{
+			this.Text = "BiUpdateHelper " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + " Service Manager";
 			UpdateStatus();
 			timer = new Timer();
 			timer.Tick += Timer_Tick;
