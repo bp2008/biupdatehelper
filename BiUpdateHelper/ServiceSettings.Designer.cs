@@ -28,10 +28,13 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServiceSettings));
 			this.label1 = new System.Windows.Forms.Label();
 			this.cb_killBlueIrisProcessesDuringUpdate = new System.Windows.Forms.CheckBox();
 			this.cb_backupUpdateFiles = new System.Windows.Forms.CheckBox();
 			this.cb_logVerbose = new System.Windows.Forms.CheckBox();
+			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.SuspendLayout();
 			// 
 			// label1
@@ -51,6 +54,7 @@
 			this.cb_killBlueIrisProcessesDuringUpdate.Size = new System.Drawing.Size(203, 17);
 			this.cb_killBlueIrisProcessesDuringUpdate.TabIndex = 1;
 			this.cb_killBlueIrisProcessesDuringUpdate.Text = "Kill Blue Iris Processes During Update";
+			this.toolTip1.SetToolTip(this.cb_killBlueIrisProcessesDuringUpdate, resources.GetString("cb_killBlueIrisProcessesDuringUpdate.ToolTip"));
 			this.cb_killBlueIrisProcessesDuringUpdate.UseVisualStyleBackColor = true;
 			this.cb_killBlueIrisProcessesDuringUpdate.CheckedChanged += new System.EventHandler(this.cb_killBlueIrisProcessesDuringUpdate_CheckedChanged);
 			// 
@@ -62,6 +66,7 @@
 			this.cb_backupUpdateFiles.Size = new System.Drawing.Size(125, 17);
 			this.cb_backupUpdateFiles.TabIndex = 2;
 			this.cb_backupUpdateFiles.Text = "Backup Update Files";
+			this.toolTip1.SetToolTip(this.cb_backupUpdateFiles, resources.GetString("cb_backupUpdateFiles.ToolTip"));
 			this.cb_backupUpdateFiles.UseVisualStyleBackColor = true;
 			this.cb_backupUpdateFiles.CheckedChanged += new System.EventHandler(this.cb_backupUpdateFiles_CheckedChanged);
 			// 
@@ -73,8 +78,16 @@
 			this.cb_logVerbose.Size = new System.Drawing.Size(206, 17);
 			this.cb_logVerbose.TabIndex = 3;
 			this.cb_logVerbose.Text = "Log Verbose (for debugging purposes)";
+			this.toolTip1.SetToolTip(this.cb_logVerbose, resources.GetString("cb_logVerbose.ToolTip"));
 			this.cb_logVerbose.UseVisualStyleBackColor = true;
 			this.cb_logVerbose.CheckedChanged += new System.EventHandler(this.cb_logVerbose_CheckedChanged);
+			// 
+			// toolTip1
+			// 
+			this.toolTip1.AutoPopDelay = 30000;
+			this.toolTip1.InitialDelay = 500;
+			this.toolTip1.IsBalloon = true;
+			this.toolTip1.ReshowDelay = 100;
 			// 
 			// ServiceSettings
 			// 
@@ -101,5 +114,6 @@
 		private System.Windows.Forms.CheckBox cb_killBlueIrisProcessesDuringUpdate;
 		private System.Windows.Forms.CheckBox cb_backupUpdateFiles;
 		private System.Windows.Forms.CheckBox cb_logVerbose;
+		private System.Windows.Forms.ToolTip toolTip1;
 	}
 }
