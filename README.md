@@ -8,7 +8,7 @@ This tool solves two common problems with Blue Iris updates.
 
 ## Installation
 
-1) Download the latest release from the release section.
+1) Download the latest release from the **releases** section above. **NOT the green Clone or download button**
 2) Extract to a directory of your choice.
 3) Run `Install_Service.bat`.  The service will now auto-start when your computer boots.
 4) To start the service without rebooting, run `Start_Service.bat`
@@ -37,7 +37,5 @@ There are 3 settings:
 `logVerbose` -- (Default: `false`) For debugging purposes, you may turn on verbose logging.  This will cause the service to write a lot of information to the log file, and should only be used if troubleshooting a problem.
 
 ## Issues
-
-I am aware this program uses more CPU time than it necessarily deserves.  I plan to do an optimization pass later, but current usage is not too significant so this is not a high priority for me.
 
 Please report any defects using the project's Issues tab above.
