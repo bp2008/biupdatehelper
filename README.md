@@ -10,23 +10,17 @@ This tool solves two common problems with Blue Iris updates.
 
 1) Download the latest release from the **releases** section above. **NOT the green Clone or download button**
 2) Extract to a directory of your choice.
-3) Run `Install_Service.bat`.  The service will now auto-start when your computer boots.
-4) To start the service without rebooting, run `Start_Service.bat`
+3) Run `BiUpdateHelper.exe`.
+4) Click `Install Service`.  The service will now auto-start when your computer boots.
+5) To start the service without rebooting, click `Start Service`.
+
+![BiUpdateHelper Service Manager](http://i.imgur.com/In5oKdQ.png)
 
 ## Configuration
 
-After you have run the program for the first time, a configuration file is saved in the same directory as BiUpdateHelper.exe
+Clicking `Edit Service Settings` in the BiUpdateHelper Service Manager interface will open a dialog where you can edit 3 settings.
 
-``` xml
-<?xml version="1.0"?>
-<BiUpdateHelperSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <killBlueIrisProcessesDuringUpdate>true</killBlueIrisProcessesDuringUpdate>
-  <backupUpdateFiles>true</backupUpdateFiles>
-  <logVerbose>false</logVerbose>
-</BiUpdateHelperSettings>
-```
-
-You may edit this configuration file at any time, and restart the service for the changes to take effect.
+![BiUpdateHelper Settings](http://i.imgur.com/QaYxylK.png)
 
 There are 3 settings:
 
