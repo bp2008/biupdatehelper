@@ -12,9 +12,13 @@ This tool solves two common problems with Blue Iris updates.
 2) Extract to a directory of your choice.
 3) Run `BiUpdateHelper.exe`.
 4) Click `Install Service`.  The service will now auto-start when your computer boots.
-5) To start the service without rebooting, click `Start Service`.
+5) To start the service without rebooting, click `Start Service`.  You may now close the Service Manager and the program will continue running in the background.
 
 ![BiUpdateHelper Service Manager](http://i.imgur.com/In5oKdQ.png)
+
+## Updating
+
+To update: Stop the service, overwrite BiUpdateHelper.exe with the new version, and start the service again.
 
 ## Configuration
 
