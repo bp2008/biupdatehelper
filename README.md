@@ -15,7 +15,7 @@ This tool solves two common problems with Blue Iris updates.
 
 ## Configuration
 
-After you have run the program for the first time, a configuration file is saved in the same directory as the .exe
+After you have run the program for the first time, a configuration file is saved in the same directory as BiUpdateHelper.exe
 
 ``` xml
 <?xml version="1.0"?>
