@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Management;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
@@ -19,6 +20,7 @@ namespace BiUpdateHelper
 		Timer timer;
 		BackgroundWorker bw = null;
 		string statusStr = "";
+		string servicePath = "";
 		Thread thrPreloadSettings;
 		public ServiceManager()
 		{
@@ -166,10 +168,23 @@ namespace BiUpdateHelper
 					btnInstall.Enabled = false;
 				}
 			}
-			if (txtStatus.Text != statusStr)
-				txtStatus.Text = statusStr;
-		}
+			if (service != null && servicePath == "")
+				servicePath = "Service path: " + GetServicePath(service.ServiceName);
 
+			bool twoStatusStrs = (!string.IsNullOrWhiteSpace(statusStr) && !string.IsNullOrWhiteSpace(statusStr));
+			string newStatus = statusStr + (twoStatusStrs ? Environment.NewLine : "") + servicePath;
+			if (txtStatus.Text != newStatus)
+				txtStatus.Text = newStatus;
+		}
+		private string GetServicePath(string serviceName)
+		{
+			using (ManagementObject wmiService = new ManagementObject("Win32_Service.Name='" + serviceName + "'"))
+			{
+				wmiService.Get();
+				string currentserviceExePath = wmiService["PathName"].ToString();
+				return currentserviceExePath;
+			}
+		}
 		private void ServiceManager_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			timer?.Stop();
@@ -184,6 +199,7 @@ namespace BiUpdateHelper
 			statusStr = std + Environment.NewLine + err;
 			RunProcessAndWait("sc", "failure BiUpdateHelper reset= 0 actions= restart/60000/restart/60000/restart/60000", out std, out err);
 			statusStr = std + Environment.NewLine + err;
+			servicePath = "";
 		}
 
 		private void UninstallService()
@@ -192,6 +208,7 @@ namespace BiUpdateHelper
 			string std, err;
 			RunProcessAndWait("sc", "delete BiUpdateHelper", out std, out err);
 			statusStr = std + Environment.NewLine + err;
+			servicePath = "";
 		}
 
 		private void StartService()

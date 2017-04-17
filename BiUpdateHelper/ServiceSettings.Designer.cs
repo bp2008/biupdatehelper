@@ -87,6 +87,7 @@
 			this.Controls.Add(this.label1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "ServiceSettings";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "BiUpdateHelper Settings";
 			this.Load += new System.EventHandler(this.ServiceSettings_Load);
 			this.ResumeLayout(false);
