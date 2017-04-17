@@ -8,7 +8,7 @@ This tool solves two common problems with Blue Iris updates.
 
 ## Installation
 
-1) Download the latest release from the **releases** section above. **NOT the green Clone or download button**
+1) Download the latest release from the [releases section](https://github.com/bp2008/biupdatehelper/releases). **NOT the green Clone or download button**
 2) Extract to a directory of your choice.
 3) Run `BiUpdateHelper.exe`.
 4) Click `Install Service`.  The service will now auto-start when your computer boots.
