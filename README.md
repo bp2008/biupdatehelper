@@ -14,7 +14,7 @@ This tool solves two common problems with Blue Iris updates.
 4) Click `Install Service`.  The service will now auto-start when your computer boots.
 5) To start the service without rebooting, click `Start Service`.  You may now close the Service Manager and the program will continue running in the background.
 
-![BiUpdateHelper Service Manager](http://i.imgur.com/In5oKdQ.png)
+![BiUpdateHelper Service Manager](http://i.imgur.com/Ff4mFF0.png)
 
 ## Updating
 
@@ -24,15 +24,19 @@ To update: Stop the service, overwrite BiUpdateHelper.exe with the new version, 
 
 Clicking `Edit Service Settings` in the BiUpdateHelper Service Manager interface will open a dialog where you can edit 3 settings.
 
-![BiUpdateHelper Settings](http://i.imgur.com/QaYxylK.png)
+![BiUpdateHelper Settings](http://i.imgur.com/52fQxhq.png)
 
-There are 3 settings:
+There are 5 settings:
 
-`killBlueIrisProcessesDuringUpdate` -- (Default: `true`) On some systems with many cameras, Blue Iris cannot stop itself gracefully, and it maxes out the CPU while it shuts down over several minutes.  This can cause updates to fail.  This setting allows the helper service to kill Blue Iris quickly the moment an update begins.
+`Kill Blue Iris processes during update` -- (Default: `enabled`) On some systems with many cameras, Blue Iris cannot stop itself gracefully, and it maxes out the CPU while it shuts down over several minutes.  This can cause updates to fail.  This setting allows the helper service to kill Blue Iris quickly the moment an update begins.
 
-`backupUpdateFiles` -- (Default: `true`) If `true`, the helper service will automatically make backups of update.exe, saving them in the Blue Iris directory with names like "update64_4.5.3.3.exe" or "update32_4.5.3.3.exe".
+`Backup update files` -- (Default: `enabled`) If `enabled`, the helper service will automatically make backups of update.exe, saving them in the Blue Iris directory with names like "update64_4.5.3.3.exe" or "update32_4.5.3.3.exe".
 
-`logVerbose` -- (Default: `false`) For debugging purposes, you may turn on verbose logging.  This will cause the service to write a lot of information to the log file, and should only be used if troubleshooting a problem.
+`Backup registry before each update` -- (Default: `enabled`) If enabled, this program will make a backup of Blue Iris's registry settings at the moment when Blue Iris begins to download a new update. Registry backups are stored alongside BiUpdateHelper.
+
+`Daily registry backup` -- (Default: `enabled`) If enabled, Blue Iris's registry settings will be backed up each day and stored alongside BiUpdateHelper.
+
+`Log verbose` -- (Default: `disabled`) For debugging purposes, you may turn on verbose logging.  This will cause the service to write a lot of information to the log file, and should only be used if troubleshooting a problem.
 
 ## Issues
 
