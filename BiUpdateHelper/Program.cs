@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
@@ -14,9 +15,17 @@ namespace BiUpdateHelper
 		/// </summary>
 		static void Main()
 		{
-			BiUpdateHelperSettings settings = new BiUpdateHelperSettings();
-			settings.Load();
-			settings.SaveDefaultIfNoExist();
+			string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+			FileInfo fiExe = new FileInfo(exePath);
+			Environment.CurrentDirectory = fiExe.Directory.FullName;
+
+			System.Threading.Thread thr = new System.Threading.Thread(() =>
+			{
+				BiUpdateHelperSettings settings = new BiUpdateHelperSettings();
+				settings.Load();
+				settings.SaveDefaultIfNoExist();
+			});
+			thr.Start();
 
 			if (Environment.UserInteractive)
 			{

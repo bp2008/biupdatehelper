@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,20 +26,12 @@ namespace BiUpdateHelper
 
 			cb_killBlueIrisProcessesDuringUpdate.Checked = settings.killBlueIrisProcessesDuringUpdate;
 			cb_backupUpdateFiles.Checked = settings.backupUpdateFiles;
+			cb_includeRegistryWithUpdateBackup.Checked = settings.includeRegistryWithUpdateBackup;
+			cb_dailyRegistryBackups.Checked = settings.dailyRegistryBackups;
 			cb_logVerbose.Checked = settings.logVerbose;
 		}
 
-		private void cb_killBlueIrisProcessesDuringUpdate_CheckedChanged(object sender, EventArgs e)
-		{
-			SaveSettings();
-		}
-
-		private void cb_backupUpdateFiles_CheckedChanged(object sender, EventArgs e)
-		{
-			SaveSettings();
-		}
-
-		private void cb_logVerbose_CheckedChanged(object sender, EventArgs e)
+		private void cb_CheckedChanged(object sender, EventArgs e)
 		{
 			SaveSettings();
 		}
@@ -49,9 +43,17 @@ namespace BiUpdateHelper
 
 			settings.killBlueIrisProcessesDuringUpdate = cb_killBlueIrisProcessesDuringUpdate.Checked;
 			settings.backupUpdateFiles = cb_backupUpdateFiles.Checked;
+			settings.includeRegistryWithUpdateBackup = cb_includeRegistryWithUpdateBackup.Checked;
+			settings.dailyRegistryBackups = cb_dailyRegistryBackups.Checked;
 			settings.logVerbose = cb_logVerbose.Checked;
 
 			settings.Save();
+		}
+
+
+		private void btnViewRegistryBackups_Click(object sender, EventArgs e)
+		{
+			Process.Start(BiUpdateHelperSettings.GetRegistryBackupLocation());
 		}
 	}
 }

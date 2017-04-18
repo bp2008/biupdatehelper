@@ -117,42 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <data name="cb_killBlueIrisProcessesDuringUpdate.ToolTip" xml:space="preserve">
-    <value>(Default: enabled)
-
-On some systems with many cameras, Blue Iris cannot 
-stop itself gracefully, and it maxes out the CPU while it 
-shuts down over several minutes.  This can cause 
-updates to fail.
-
-This setting allows the helper service to kill Blue Iris 
-quickly the moment an update begins.</value>
-  </data>
-  <data name="cb_backupUpdateFiles.ToolTip" xml:space="preserve">
-    <value>(Default: enabled)
-
-If enabled, the helper service will automatically make 
-backups of update.exe, saving them in the Blue Iris 
-directory with names like "update64_4.5.3.3.exe" 
-or "update32_4.5.3.3.exe".</value>
-  </data>
-  <data name="cb_logVerbose.ToolTip" xml:space="preserve">
-    <value>(Default: disabled)
-
-For debugging purposes, you may turn on verbose logging.
-This will cause the service to write a lot of information to the 
-log file, and should only be used if troubleshooting a problem.</value>
-  </data>
-  <data name="cb_includeRegistryWithUpdateBackup.ToolTip" xml:space="preserve">
-    <value>(Default: enabled)
-
-If enabled, this program will make a backup of Blue Iris's 
-registry settings at the moment when Blue Iris begins to 
-download a new update.
-
-Registry backups are stored alongside BiUpdateHelper.</value>
-  </data>
 </root>

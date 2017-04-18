@@ -35,10 +35,6 @@ namespace BiUpdateHelper
 
 		protected override void OnStart(string[] args)
 		{
-			string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-			FileInfo fiExe = new FileInfo(exePath);
-			Environment.CurrentDirectory = fiExe.Directory.FullName;
-
 			settings = new BiUpdateHelperSettings();
 			settings.Load();
 
@@ -56,12 +52,20 @@ namespace BiUpdateHelper
 		{
 			try
 			{
+				DateTime lastDailyRegistryBackup = DateTime.MinValue;
 				while (true)
 				{
 					Thread.Sleep(1500);
 					Verbose("Starting Iteration");
 					try
 					{
+						DateTime now = DateTime.Now;
+						if (lastDailyRegistryBackup.Year != now.Year || lastDailyRegistryBackup.Month != now.Month || lastDailyRegistryBackup.Day != now.Day)
+						{
+							lastDailyRegistryBackup = now;
+							if (settings.dailyRegistryBackups)
+								RegistryBackup.BackupNow(BiUpdateHelperSettings.GetDailyRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd") + ".reg");
+						}
 						// Build a list of unique directories that have an active blueiris.exe.
 						// There is not likely to be more than one directory, though a single directory 
 						// can easily have two blueiris.exe (service and GUI).
@@ -79,6 +83,11 @@ namespace BiUpdateHelper
 								{
 									// Blue Iris is currently being updated.  Kill the blueiris.exe processes if configured to do so.
 									Verbose("Blue Iris update detected in path: " + mapping.dirPath);
+									if (settings.includeRegistryWithUpdateBackup)
+									{
+										BiVersionInfo versionInfo = GetBiVersionInfo(mapping);
+										TryBackupRegistryForBiVersion(versionInfo);
+									}
 									if (settings.killBlueIrisProcessesDuringUpdate)
 									{
 										Verbose("Killing Blue Iris processes");
@@ -104,17 +113,14 @@ namespace BiUpdateHelper
 									Verbose("Backing up update file: " + fiUpdate.FullName);
 
 									// Get Blue Iris process(es) (necessary to learn if it is 64 or 32 bit)
-									string cpu_32_64 = Is64Bit(mapping.biProcs[0].process) ? "64" : "32";
+									BiVersionInfo versionInfo = GetBiVersionInfo(mapping);
 
-									// Get current Blue Iris version.
-									FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(mapping.biProcs[0].path);
-									string version = fvi.FileVersion;
-
-									FileInfo targetUpdateFile = new FileInfo(mapping.dirPath + "update" + cpu_32_64 + "_" + version + ".exe");
+									FileInfo targetUpdateFile = new FileInfo(mapping.dirPath + "update" + versionInfo.cpu_32_64 + "_" + versionInfo.version + ".exe");
 									if (targetUpdateFile.Exists)
 									{
 										// A backed-up update file for the active Blue Iris version already exists, so we should do nothing now
 										Verbose("Target update file \"" + targetUpdateFile.FullName + "\" already exists.  Probably, the new update file hasn't been installed yet.");
+										TryBackupRegistryForBiVersion(versionInfo);
 									}
 									else
 									{
@@ -156,6 +162,34 @@ namespace BiUpdateHelper
 				Logger.Debug(ex);
 			}
 		}
+
+		private BiVersionInfo GetBiVersionInfo(BiUpdateMapping mapping)
+		{
+			try
+			{
+				if (mapping?.biProcs?.Length > 0)
+				{
+					string cpu_32_64 = Is64Bit(mapping.biProcs[0].process) ? "64" : "32";
+
+					FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(mapping.biProcs[0].path);
+					string version = fvi.FileVersion;
+
+					return new BiVersionInfo(cpu_32_64, version);
+				}
+			}
+			catch (ThreadAbortException) { throw; }
+			catch (Exception ex)
+			{
+				Logger.Debug(ex);
+			}
+			return null;
+		}
+		private void TryBackupRegistryForBiVersion(BiVersionInfo versionInfo)
+		{
+			if (versionInfo != null && settings.includeRegistryWithUpdateBackup)
+				RegistryBackup.BackupNow(BiUpdateHelperSettings.GetBeforeUpdatesRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + versionInfo.cpu_32_64 + "-" + versionInfo.version + ".reg");
+		}
+
 		private List<BiUpdateMapping> GetUpdateInfo()
 		{
 			List<RelatedProcessInfo> allBiProcs = new List<RelatedProcessInfo>();
@@ -233,6 +267,16 @@ namespace BiUpdateHelper
 		[DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
+	}
+	public class BiVersionInfo
+	{
+		public string cpu_32_64;
+		public string version;
+		public BiVersionInfo(string cpu_32_64, string version)
+		{
+			this.cpu_32_64 = cpu_32_64;
+			this.version = version;
+		}
 	}
 	public class RelatedProcessInfo
 	{

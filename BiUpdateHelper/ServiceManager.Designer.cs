@@ -34,6 +34,8 @@
 			this.lblService = new System.Windows.Forms.Label();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.btnSettings = new System.Windows.Forms.Button();
+			this.btnRegkey = new System.Windows.Forms.Button();
+			this.btnRegistryBackupNow = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnInstall
@@ -69,7 +71,7 @@
 			this.txtStatus.ReadOnly = true;
 			this.txtStatus.ScrollBars = System.Windows.Forms.ScrollBars.Both;
 			this.txtStatus.Size = new System.Drawing.Size(392, 145);
-			this.txtStatus.TabIndex = 2;
+			this.txtStatus.TabIndex = 4;
 			// 
 			// lblService
 			// 
@@ -87,7 +89,7 @@
 			this.progressBar.Name = "progressBar";
 			this.progressBar.Size = new System.Drawing.Size(392, 23);
 			this.progressBar.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-			this.progressBar.TabIndex = 4;
+			this.progressBar.TabIndex = 2;
 			this.progressBar.Value = 100;
 			this.progressBar.Visible = false;
 			// 
@@ -96,16 +98,38 @@
 			this.btnSettings.Location = new System.Drawing.Point(211, 268);
 			this.btnSettings.Name = "btnSettings";
 			this.btnSettings.Size = new System.Drawing.Size(193, 23);
-			this.btnSettings.TabIndex = 5;
+			this.btnSettings.TabIndex = 6;
 			this.btnSettings.Text = "Edit Service Settings";
 			this.btnSettings.UseVisualStyleBackColor = true;
 			this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
+			// 
+			// btnRegkey
+			// 
+			this.btnRegkey.Location = new System.Drawing.Point(12, 268);
+			this.btnRegkey.Name = "btnRegkey";
+			this.btnRegkey.Size = new System.Drawing.Size(193, 23);
+			this.btnRegkey.TabIndex = 5;
+			this.btnRegkey.Text = "BI Registration Info";
+			this.btnRegkey.UseVisualStyleBackColor = true;
+			this.btnRegkey.Click += new System.EventHandler(this.btnRegkey_Click);
+			// 
+			// btnRegistryBackupNow
+			// 
+			this.btnRegistryBackupNow.Location = new System.Drawing.Point(211, 297);
+			this.btnRegistryBackupNow.Name = "btnRegistryBackupNow";
+			this.btnRegistryBackupNow.Size = new System.Drawing.Size(193, 23);
+			this.btnRegistryBackupNow.TabIndex = 7;
+			this.btnRegistryBackupNow.Text = "Take Registry Backup Now";
+			this.btnRegistryBackupNow.UseVisualStyleBackColor = true;
+			this.btnRegistryBackupNow.Click += new System.EventHandler(this.btnRegistryBackupNow_Click);
 			// 
 			// ServiceManager
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(416, 303);
+			this.ClientSize = new System.Drawing.Size(416, 324);
+			this.Controls.Add(this.btnRegistryBackupNow);
+			this.Controls.Add(this.btnRegkey);
 			this.Controls.Add(this.btnSettings);
 			this.Controls.Add(this.btnStart);
 			this.Controls.Add(this.btnInstall);
@@ -130,5 +154,7 @@
 		private System.Windows.Forms.Label lblService;
 		private System.Windows.Forms.ProgressBar progressBar;
 		private System.Windows.Forms.Button btnSettings;
+		private System.Windows.Forms.Button btnRegkey;
+		private System.Windows.Forms.Button btnRegistryBackupNow;
 	}
 }

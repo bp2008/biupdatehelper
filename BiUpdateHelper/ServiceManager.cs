@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.ServiceProcess;
@@ -263,6 +264,17 @@ namespace BiUpdateHelper
 		{
 			ServiceSettings settingsDialog = new ServiceSettings();
 			settingsDialog.ShowDialog();
+		}
+
+		private void btnRegkey_Click(object sender, EventArgs e)
+		{
+			RegKey regKeyDialog = new RegKey();
+			regKeyDialog.ShowDialog();
+		}
+
+		private void btnRegistryBackupNow_Click(object sender, EventArgs e)
+		{
+			RegistryBackup.BackupNow(BiUpdateHelperSettings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg");
 		}
 	}
 }
