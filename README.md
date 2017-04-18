@@ -6,6 +6,8 @@ This tool solves two common problems with Blue Iris updates.
 
 2) Ensuring that Blue Iris closes itself for the update.  In some large systems with many cameras, Blue Iris fails to shut down gracefully during the update process.  This tool will automatically kill blueiris.exe whenever Blue Iris updates itself, or when you run any `update*.exe` within the same directory as BlueIris.exe.
 
+Additionally, this tool can back up Blue Iris's registry settings to aid in restoration of a previous version.  Restoring registry settings is not usually necessary, but when it is, **it really is**.
+
 ## Installation
 
 1) Download the latest release from the [releases section](https://github.com/bp2008/biupdatehelper/releases). **NOT the green `Clone or download` button**
