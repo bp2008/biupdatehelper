@@ -16,7 +16,6 @@ namespace BiUpdateHelper
 	public partial class MainSvc : ServiceBase
 	{
 		Thread thrMain;
-		BiUpdateHelperSettings settings;
 
 		public MainSvc()
 		{
@@ -35,9 +34,6 @@ namespace BiUpdateHelper
 
 		protected override void OnStart(string[] args)
 		{
-			settings = new BiUpdateHelperSettings();
-			settings.Load();
-
 			thrMain = new Thread(UpdateWatch);
 			thrMain.Name = "Main Logic";
 			thrMain.Start();
@@ -63,7 +59,7 @@ namespace BiUpdateHelper
 						if (lastDailyRegistryBackup.Year != now.Year || lastDailyRegistryBackup.Month != now.Month || lastDailyRegistryBackup.Day != now.Day)
 						{
 							lastDailyRegistryBackup = now;
-							if (settings.dailyRegistryBackups)
+							if (Program.settings.dailyRegistryBackups)
 								RegistryBackup.BackupNow(BiUpdateHelperSettings.GetDailyRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd") + ".reg");
 						}
 						// Build a list of unique directories that have an active blueiris.exe.
@@ -83,12 +79,12 @@ namespace BiUpdateHelper
 								{
 									// Blue Iris is currently being updated.  Kill the blueiris.exe processes if configured to do so.
 									Verbose("Blue Iris update detected in path: " + mapping.dirPath);
-									if (settings.includeRegistryWithUpdateBackup)
+									if (Program.settings.includeRegistryWithUpdateBackup)
 									{
 										BiVersionInfo versionInfo = GetBiVersionInfo(mapping);
 										TryBackupRegistryForBiVersion(versionInfo);
 									}
-									if (settings.killBlueIrisProcessesDuringUpdate)
+									if (Program.settings.killBlueIrisProcessesDuringUpdate)
 									{
 										Verbose("Killing Blue Iris processes");
 										mapping.KillBiProcs();
@@ -99,7 +95,7 @@ namespace BiUpdateHelper
 								else
 								{
 									// Blue Iris is not being updated in this directory.  Back up the update file if configured to do so.
-									if (!settings.backupUpdateFiles)
+									if (!Program.settings.backupUpdateFiles)
 										continue;
 
 									//Check for the existence of an update.exe file
@@ -186,7 +182,7 @@ namespace BiUpdateHelper
 		}
 		private void TryBackupRegistryForBiVersion(BiVersionInfo versionInfo)
 		{
-			if (versionInfo != null && settings.includeRegistryWithUpdateBackup)
+			if (versionInfo != null && Program.settings.includeRegistryWithUpdateBackup)
 				RegistryBackup.BackupNow(BiUpdateHelperSettings.GetBeforeUpdatesRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + versionInfo.cpu_32_64 + "-" + versionInfo.version + ".reg");
 		}
 
@@ -251,7 +247,7 @@ namespace BiUpdateHelper
 		}
 		private void Verbose(string str)
 		{
-			if (settings.logVerbose)
+			if (Program.settings.logVerbose)
 				Logger.Info(str);
 		}
 		private bool Is64Bit(Process p)

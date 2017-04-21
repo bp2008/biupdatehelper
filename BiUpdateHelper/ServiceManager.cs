@@ -243,11 +243,11 @@ namespace BiUpdateHelper
 
 			p.OutputDataReceived += (sender, e) =>
 			{
-				sbOutput.Append(e.Data);
+				sbOutput.AppendLine(e.Data);
 			};
 			p.ErrorDataReceived += (sender, e) =>
 			{
-				sbError.Append(e.Data);
+				sbError.AppendLine(e.Data);
 			};
 			p.BeginOutputReadLine();
 			p.BeginErrorReadLine();

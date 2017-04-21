@@ -14,6 +14,9 @@ namespace BiUpdateHelper
 {
 	public partial class ServiceSettings : Form
 	{
+		BiUpdateHelperSettings settings = Program.settings;
+		volatile bool isLoaded = false;
+
 		public ServiceSettings()
 		{
 			InitializeComponent();
@@ -21,14 +24,13 @@ namespace BiUpdateHelper
 
 		private void ServiceSettings_Load(object sender, EventArgs e)
 		{
-			BiUpdateHelperSettings settings = new BiUpdateHelperSettings();
-			settings.Load();
-
+			isLoaded = false;
 			cb_killBlueIrisProcessesDuringUpdate.Checked = settings.killBlueIrisProcessesDuringUpdate;
 			cb_backupUpdateFiles.Checked = settings.backupUpdateFiles;
 			cb_includeRegistryWithUpdateBackup.Checked = settings.includeRegistryWithUpdateBackup;
 			cb_dailyRegistryBackups.Checked = settings.dailyRegistryBackups;
 			cb_logVerbose.Checked = settings.logVerbose;
+			isLoaded = true;
 		}
 
 		private void cb_CheckedChanged(object sender, EventArgs e)
@@ -38,16 +40,16 @@ namespace BiUpdateHelper
 
 		private void SaveSettings()
 		{
-			BiUpdateHelperSettings settings = new BiUpdateHelperSettings();
-			settings.Load();
+			if (isLoaded)
+			{
+				settings.killBlueIrisProcessesDuringUpdate = cb_killBlueIrisProcessesDuringUpdate.Checked;
+				settings.backupUpdateFiles = cb_backupUpdateFiles.Checked;
+				settings.includeRegistryWithUpdateBackup = cb_includeRegistryWithUpdateBackup.Checked;
+				settings.dailyRegistryBackups = cb_dailyRegistryBackups.Checked;
+				settings.logVerbose = cb_logVerbose.Checked;
 
-			settings.killBlueIrisProcessesDuringUpdate = cb_killBlueIrisProcessesDuringUpdate.Checked;
-			settings.backupUpdateFiles = cb_backupUpdateFiles.Checked;
-			settings.includeRegistryWithUpdateBackup = cb_includeRegistryWithUpdateBackup.Checked;
-			settings.dailyRegistryBackups = cb_dailyRegistryBackups.Checked;
-			settings.logVerbose = cb_logVerbose.Checked;
-
-			settings.Save();
+				settings.Save();
+			}
 		}
 
 

@@ -10,6 +10,7 @@ namespace BiUpdateHelper
 {
 	static class Program
 	{
+		public static BiUpdateHelperSettings settings;
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
@@ -19,13 +20,9 @@ namespace BiUpdateHelper
 			FileInfo fiExe = new FileInfo(exePath);
 			Environment.CurrentDirectory = fiExe.Directory.FullName;
 
-			System.Threading.Thread thr = new System.Threading.Thread(() =>
-			{
-				BiUpdateHelperSettings settings = new BiUpdateHelperSettings();
-				settings.Load();
-				settings.SaveDefaultIfNoExist();
-			});
-			thr.Start();
+			settings = new BiUpdateHelperSettings();
+			settings.Load();
+			settings.SaveDefaultIfNoExist();
 
 			if (Environment.UserInteractive)
 			{
