@@ -5,6 +5,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using BPUtil.Forms;
 
 namespace BiUpdateHelper
 {
@@ -22,11 +23,18 @@ namespace BiUpdateHelper
 
 			settings = new BiUpdateHelperSettings();
 			settings.Load();
-			settings.SaveDefaultIfNoExist();
+			settings.SaveIfNoExist();
 
 			if (Environment.UserInteractive)
 			{
-				System.Windows.Forms.Application.Run(new ServiceManager());
+				string Title = "BiUpdateHelper " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + " Service Manager";
+				string ServiceName = "BiUpdateHelper";
+				ButtonDefinition btnRegKey = new ButtonDefinition("BI Registration Info", btnRegkey_Click);
+				ButtonDefinition btnSettings = new ButtonDefinition("Edit Service Settings", btnSettings_Click);
+				ButtonDefinition btnRegistryBackupNow = new ButtonDefinition("Take Registry Backup Now", btnRegistryBackupNow_Click);
+				ButtonDefinition[] customButtons = new ButtonDefinition[] { btnRegKey, btnSettings, null, btnRegistryBackupNow };
+
+				System.Windows.Forms.Application.Run(new ServiceManager(Title, ServiceName, customButtons));
 			}
 			else
 			{
@@ -37,6 +45,23 @@ namespace BiUpdateHelper
 				};
 				ServiceBase.Run(ServicesToRun);
 			}
+		}
+
+		private static void btnSettings_Click(object sender, EventArgs e)
+		{
+			ServiceSettings settingsDialog = new ServiceSettings();
+			settingsDialog.ShowDialog();
+		}
+
+		private static void btnRegkey_Click(object sender, EventArgs e)
+		{
+			RegKey regKeyDialog = new RegKey();
+			regKeyDialog.ShowDialog();
+		}
+
+		private static void btnRegistryBackupNow_Click(object sender, EventArgs e)
+		{
+			RegistryBackup.BackupNow(BiUpdateHelperSettings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg");
 		}
 	}
 }

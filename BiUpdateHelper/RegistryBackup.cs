@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BPUtil;
 
 namespace BiUpdateHelper
 {
@@ -35,9 +36,16 @@ namespace BiUpdateHelper
 						Directory.CreateDirectory(fi.Directory.FullName);
 					Process p = Process.Start("regedit.exe", "/e \"" + destinationFile + "\" \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Perspective Software\\Blue Iris\"");
 					p.WaitForExit();
-					ZipFile(destinationFile, destinationFile + ".7z");
 					fi.Refresh();
-					fi.Delete();
+					if (fi.Exists)
+					{
+						ZipFile(destinationFile, destinationFile + ".7z");
+						fi.Delete();
+					}
+					else
+					{
+						Logger.Info("Registry backup failed.  Probably, the registry key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Perspective Software\\Blue Iris\" does not exist.");
+					}
 				}
 				catch (ThreadAbortException)
 				{
