@@ -31,8 +31,9 @@ namespace BiUpdateHelper
 				string ServiceName = "BiUpdateHelper";
 				ButtonDefinition btnRegKey = new ButtonDefinition("BI Registration Info", btnRegkey_Click);
 				ButtonDefinition btnSettings = new ButtonDefinition("Edit Service Settings", btnSettings_Click);
+				ButtonDefinition btnCameraConfigLinks = new ButtonDefinition("Camera Config Links", btnCameraConfigLinks_Click);
 				ButtonDefinition btnRegistryBackupNow = new ButtonDefinition("Take Registry Backup Now", btnRegistryBackupNow_Click);
-				ButtonDefinition[] customButtons = new ButtonDefinition[] { btnRegKey, btnSettings, null, btnRegistryBackupNow };
+				ButtonDefinition[] customButtons = new ButtonDefinition[] { btnRegKey, btnSettings, btnCameraConfigLinks, btnRegistryBackupNow };
 
 				System.Windows.Forms.Application.Run(new ServiceManager(Title, ServiceName, customButtons));
 			}
@@ -41,10 +42,15 @@ namespace BiUpdateHelper
 				ServiceBase[] ServicesToRun;
 				ServicesToRun = new ServiceBase[]
 				{
-				new MainSvc()
+					new MainSvc()
 				};
 				ServiceBase.Run(ServicesToRun);
 			}
+		}
+		private static void btnRegkey_Click(object sender, EventArgs e)
+		{
+			RegKey regKeyDialog = new RegKey();
+			regKeyDialog.ShowDialog();
 		}
 
 		private static void btnSettings_Click(object sender, EventArgs e)
@@ -53,10 +59,11 @@ namespace BiUpdateHelper
 			settingsDialog.ShowDialog();
 		}
 
-		private static void btnRegkey_Click(object sender, EventArgs e)
+		private static void btnCameraConfigLinks_Click(object sender, EventArgs e)
 		{
-			RegKey regKeyDialog = new RegKey();
-			regKeyDialog.ShowDialog();
+			FileInfo fiExe = new FileInfo(System.Windows.Forms.Application.ExecutablePath);
+			string path = fiExe.Directory.FullName.TrimEnd('\\', '/') + Path.DirectorySeparatorChar + "CameraConfigLinks.html";
+			CameraWebInterfaceLinker.GenerateWebInterfaceLinkDocument(path);
 		}
 
 		private static void btnRegistryBackupNow_Click(object sender, EventArgs e)

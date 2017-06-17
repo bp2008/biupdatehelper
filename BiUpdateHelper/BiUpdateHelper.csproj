@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CameraWebInterfaceLinker.cs" />
     <Compile Include="MainSvc.cs">
       <SubType>Component</SubType>
     </Compile>
