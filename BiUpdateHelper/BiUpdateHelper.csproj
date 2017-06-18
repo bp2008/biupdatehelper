@@ -57,6 +57,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BiServerInfo.cs" />
+    <Compile Include="BiUserInfo.cs" />
     <Compile Include="CameraWebInterfaceLinker.cs" />
     <Compile Include="MainSvc.cs">
       <SubType>Component</SubType>

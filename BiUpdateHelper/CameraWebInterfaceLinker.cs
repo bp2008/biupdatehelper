@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using BPUtil;
 using Microsoft.Win32;
 
 namespace BiUpdateHelper
@@ -32,63 +36,101 @@ td, th
 	border-bottom: 1px solid #b5b5b5;
     padding: 2px 12px;
 }
-.linkWrapper
+img
 {
-	/* position: inline-block; */
-	vertical-align: top;
-}
-.linkWrapper img
-{
-	max-width: 320px;
-	max-height: 240px;
+	max-width: 120px;
+    max-height: 120px;
+	cursor: pointer;
 }
 		</style>");
 			sb.AppendLine("	</head>");
 			sb.AppendLine("<body>");
-			sb.AppendLine("<table><thead><tr><th>Camera Name</th><th>Short Name</th><th>Configuration URL</th></tr></thead><tbody>");
+			sb.AppendLine("<table><thead><tr><th>Camera Name</th><th>Short Name</th><th>Configuration URL</th><th>Snapshot</th></tr></thead><tbody>");
 			RegistryKey cameras = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\Cameras");
 			string[] cameraNames = cameras.GetSubKeyNames();
-			List<CameraInfo> camList = new List<CameraInfo>(cameraNames.Length);
-			foreach (string cameraName in cameraNames)
+			if (cameraNames.Length > 0)
 			{
-				RegistryKey cam = cameras.OpenSubKey(cameraName);
-				string shortName = cam.GetValue("shortname").ToString();
-				string ip = cam.GetValue("ip").ToString();
-				string port = cam.GetValue("ip_port").ToString();
-				bool https = cam.GetValue("https").ToString() != "0";
-				int index = int.Parse(cam.GetValue("pos").ToString());
-				CameraInfo ci = new CameraInfo(cameraName, shortName, ip, port, https, index);
-				camList.Add(ci);
+				BiServerInfo.Reload();
+				BiUserInfo.Reload();
+				CookieAwareWebClient wc = new CookieAwareWebClient();
+				wc.Proxy = null;
+				if (BiServerInfo.authenticate == AuthenticationMode.All_connections)
+				{
+					try
+					{
+						wc.CookieContainer.Add(new Cookie("session", GetSecureAuthenticatedSession(wc), "/", BiServerInfo.lanIp));
+					}
+					catch (Exception ex)
+					{
+						Logger.Debug(ex);
+						wc = null;
+					}
+				}
+
+				List<CameraInfo> camList = new List<CameraInfo>(cameraNames.Length);
+				foreach (string cameraName in cameraNames)
+				{
+					RegistryKey cam = cameras.OpenSubKey(cameraName);
+					string shortName = cam.GetValue("shortname").ToString();
+					string ip = cam.GetValue("ip").ToString();
+					string port = cam.GetValue("ip_port").ToString();
+					bool https = cam.GetValue("https").ToString() != "0";
+					int index = int.Parse(cam.GetValue("pos").ToString());
+					CameraInfo ci = new CameraInfo(cameraName, shortName, ip, port, https, index);
+					camList.Add(ci);
+				}
+				camList.Sort(new Comparison<CameraInfo>((c1, c2) => c1.index.CompareTo(c2.index)));
+				foreach (CameraInfo ci in camList)
+					AddCameraLink(sb, ci, wc);
 			}
-			camList.Sort(new Comparison<CameraInfo>((c1, c2) => c1.index.CompareTo(c2.index)));
-			foreach (CameraInfo ci in camList)
-				AddCameraLink(sb, ci);
 			sb.AppendLine("</tbody></table></body>");
 			sb.AppendLine("</html>");
 			File.WriteAllText(outPath, sb.ToString());
 			Process.Start(outPath);
 		}
 
-		private static void AddCameraLink(StringBuilder sb, CameraInfo ci)
+		private static string GetSecureAuthenticatedSession(WebClient wc)
+		{
+			string url = "http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/json";
+			string response = wc.UploadString(url, "{\"cmd\":\"login\"}");
+			Match m = Regex.Match(response, "\"session\": ?\"(.*?)\"");
+			if (!m.Success)
+				throw new Exception("Unexpected response from login command: " + response);
+			string session = m.Groups[1].Value;
+			string challengeResponse = Hash.GetMD5Hex(BiUserInfo.preferredUser?.name + ":" + session + ":" + BiUserInfo.preferredUser?.GetDecodedPassword());
+			response = wc.UploadString(url, "{\"cmd\":\"login\",\"response\":\"" + challengeResponse + "\",\"session\":\"" + session + "\"}");
+			if (Regex.IsMatch(response, "\"result\": ?\"success\""))
+				return session;
+			else
+				throw new Exception("Unable to log in to server");
+		}
+
+		private static void AddCameraLink(StringBuilder sb, CameraInfo ci, WebClient wc)
 		{
 			string link = "http" + (ci.https ? "s" : "") + "://" + ci.ip + (ci.port == (ci.https ? "443" : "80") ? "" : (":" + ci.port)) + "/";
-			//string label = ci.cameraName + " (" + ci.shortName + ") (" + link + ")";
+			string snapshot = wc == null ? "Unable to authenticate" : GetSnapshot(ci.shortName, ci.cameraName + " (" + ci.shortName + ") (" + link + ")", wc);
 			sb.Append("<tr>");
 			sb.Append("<td>" + ci.cameraName + "</td>");
 			sb.Append("<td>" + ci.shortName + "</td>");
 			sb.Append("<td><a href=\"" + link + "\">" + link + "</a></td>");
+			sb.Append("<td><a href=\"" + link + "\">" + snapshot + "</a></td>");
 			sb.AppendLine("</tr>");
 		}
 
-		//private static string GetLabel(string shortName, string label)
-		//{
-		//	return "<img src=\"" + GetThumbnail(shortName) + "\" alt=\"" + label + "\" />";
-		//}
+		private static string GetSnapshot(string shortName, string label, WebClient wc)
+		{
+			return "<img src=\"" + GetThumbnail(shortName, wc) + "\" alt=\"" + label + "\" />";
+		}
 
-		//private static string GetThumbnail(string shortName)
-		//{
-		//	return "";
-		//}
+		private static string GetThumbnail(string shortName, WebClient wc)
+		{
+			try
+			{
+				byte[] jpeg = wc.DownloadData("http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/image/" + shortName + "?&w=160&q=25");
+				return "data:image/jpg;base64," + Convert.ToBase64String(jpeg);
+			}
+			catch { return ""; }
+		}
 
 		private class CameraInfo
 		{

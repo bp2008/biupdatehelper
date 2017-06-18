@@ -5,6 +5,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using BPUtil;
 using BPUtil.Forms;
 
 namespace BiUpdateHelper
@@ -17,6 +18,9 @@ namespace BiUpdateHelper
 		/// </summary>
 		static void Main()
 		{
+			Globals.Initialize(System.Reflection.Assembly.GetExecutingAssembly().Location);
+			PrivateAccessor.SetStaticFieldValue(typeof(Globals), "errorFilePath", Globals.WritableDirectoryBase + "BiUpdateHelper_Log.txt");
+
 			string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 			FileInfo fiExe = new FileInfo(exePath);
 			Environment.CurrentDirectory = fiExe.Directory.FullName;
