@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BPUtil;
 using Microsoft.Win32;
 
 namespace BiUpdateHelper
@@ -21,7 +22,17 @@ namespace BiUpdateHelper
 			RegistryKey usersKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\server\\users");
 			users = new List<UserInfo>();
 			foreach (string name in usersKey.GetSubKeyNames())
-				users.Add(new UserInfo(usersKey.OpenSubKey(name), name));
+			{
+				try
+				{
+					users.Add(new UserInfo(usersKey.OpenSubKey(name), name));
+				}
+				catch (Exception ex)
+				{
+					if (Program.settings.logVerbose)
+						Logger.Debug(ex);
+				}
+			}
 			preferredUser = null;
 			foreach (UserInfo user in users)
 				if (user.name.ToLower() != "admin" && user.name.ToLower() != "anonymous" && string.IsNullOrEmpty(user.selgroups))
