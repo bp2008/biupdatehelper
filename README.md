@@ -40,6 +40,10 @@ There are 5 settings:
 
 `Log verbose` -- (Default: `disabled`) For debugging purposes, you may turn on verbose logging.  This will cause the service to write a lot of information to the log file, and should only be used if troubleshooting a problem.
 
+## Recovering Registration Keys
+
+Though it is not the primary purpose of this tool, clicking the "BI Registration Info" button will show you what registration key you used to activate Blue Iris 3 or Blue Iris 4.  This is helpful in case you've lost your registration key and you want to deactivate and reinstall on a new PC.
+
 ## Issues
 
 Please report any defects using the project's Issues tab above.
