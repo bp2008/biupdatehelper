@@ -25,7 +25,7 @@ namespace BiUpdateHelper
 		}
 		private void LoadFromKey(string key, TextBox txtReg, TextBox txtName, TextBox txtEmail)
 		{
-			byte[] regKeyData = GetHKLMValue<byte[]>(@"SOFTWARE\Perspective Software\Blue Iris\Registration", "Data40", null);
+			byte[] regKeyData = GetHKLMValue<byte[]>(@"SOFTWARE\Perspective Software\Blue Iris\Registration", key, null);
 
 			if (regKeyData == null)
 				txtReg.Text = "Not Found!";
