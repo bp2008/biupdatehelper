@@ -20,6 +20,11 @@ namespace BiUpdateHelper
 
 		private void RegKey_Load(object sender, EventArgs e)
 		{
+			LoadFromKey("Data30", txtReg3, txtName3, txtEmail3);
+			LoadFromKey("Data40", txtReg4, txtName4, txtEmail4);
+		}
+		private void LoadFromKey(string key, TextBox txtReg, TextBox txtName, TextBox txtEmail)
+		{
 			byte[] regKeyData = GetHKLMValue<byte[]>(@"SOFTWARE\Perspective Software\Blue Iris\Registration", "Data40", null);
 
 			if (regKeyData == null)
