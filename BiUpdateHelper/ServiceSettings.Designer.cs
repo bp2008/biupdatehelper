@@ -38,6 +38,7 @@
 			this.cb_includeRegistryWithUpdateBackup = new System.Windows.Forms.CheckBox();
 			this.cb_dailyRegistryBackups = new System.Windows.Forms.CheckBox();
 			this.btnViewRegistryBackups = new System.Windows.Forms.Button();
+			this.cb_BI32Win64 = new System.Windows.Forms.CheckBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -127,11 +128,25 @@
 			this.btnViewRegistryBackups.UseVisualStyleBackColor = true;
 			this.btnViewRegistryBackups.Click += new System.EventHandler(this.btnViewRegistryBackups_Click);
 			// 
+			// cb_BI32Win64
+			// 
+			this.cb_BI32Win64.AutoSize = true;
+			this.cb_BI32Win64.Location = new System.Drawing.Point(12, 154);
+			this.cb_BI32Win64.Name = "cb_BI32Win64";
+			this.cb_BI32Win64.Size = new System.Drawing.Size(183, 17);
+			this.cb_BI32Win64.TabIndex = 7;
+			this.cb_BI32Win64.Text = "32 bit Blue Iris on 64 bit Windows";
+			this.toolTip1.SetToolTip(this.cb_BI32Win64, "You should only need to check this box if you want this \r\nprogram to work with 32" +
+        " bit Blue Iris on 64 bit Windows.");
+			this.cb_BI32Win64.UseVisualStyleBackColor = true;
+			this.cb_BI32Win64.CheckedChanged += new System.EventHandler(this.cb_CheckedChanged);
+			// 
 			// ServiceSettings
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(380, 169);
+			this.ClientSize = new System.Drawing.Size(380, 178);
+			this.Controls.Add(this.cb_BI32Win64);
 			this.Controls.Add(this.btnViewRegistryBackups);
 			this.Controls.Add(this.cb_dailyRegistryBackups);
 			this.Controls.Add(this.cb_includeRegistryWithUpdateBackup);
@@ -159,5 +174,6 @@
 		private System.Windows.Forms.CheckBox cb_includeRegistryWithUpdateBackup;
 		private System.Windows.Forms.CheckBox cb_dailyRegistryBackups;
 		private System.Windows.Forms.Button btnViewRegistryBackups;
+		private System.Windows.Forms.CheckBox cb_BI32Win64;
 	}
 }

@@ -29,6 +29,10 @@ namespace BiUpdateHelper
 			settings.Load();
 			settings.SaveIfNoExist();
 
+			RegistryUtil.Force32BitRegistryAccess = settings.bi32OnWin64;
+
+			AutoFixBad32BitSetting();
+
 			if (Environment.UserInteractive)
 			{
 				string Title = "BiUpdateHelper " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + " Service Manager";
@@ -51,6 +55,28 @@ namespace BiUpdateHelper
 				ServiceBase.Run(ServicesToRun);
 			}
 		}
+
+		private static void AutoFixBad32BitSetting()
+		{
+			if (Environment.Is64BitOperatingSystem)
+			{
+				// This is a 64 bit OS, so it is possible that our bi32OnWin64 setting is wrong.
+				if (RegistryUtil.GetHKLMKey(@"SOFTWARE\Perspective Software\Blue Iris") == null)
+				{
+					// No BI detected. Try the opposite setting.
+					RegistryUtil.Force32BitRegistryAccess = !RegistryUtil.Force32BitRegistryAccess;
+					if (RegistryUtil.GetHKLMKey(@"SOFTWARE\Perspective Software\Blue Iris") == null)
+						RegistryUtil.Force32BitRegistryAccess = !RegistryUtil.Force32BitRegistryAccess; // No BI detected. Revert setting.
+					else
+					{
+						// Found BI using the opposite setting.  Save the setting.
+						settings.bi32OnWin64 = RegistryUtil.Force32BitRegistryAccess;
+						settings.Save();
+					}
+				}
+			}
+		}
+
 		private static void btnRegkey_Click(object sender, EventArgs e)
 		{
 			RegKey regKeyDialog = new RegKey();

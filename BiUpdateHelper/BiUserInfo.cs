@@ -19,7 +19,7 @@ namespace BiUpdateHelper
 
 		public static void Reload()
 		{
-			RegistryKey usersKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\server\\users");
+			RegistryKey usersKey = RegistryUtil.HKLM.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\server\\users");
 			users = new List<UserInfo>();
 			foreach (string name in usersKey.GetSubKeyNames())
 			{

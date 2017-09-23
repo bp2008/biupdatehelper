@@ -17,6 +17,7 @@ namespace BiUpdateHelper
 		public bool includeRegistryWithUpdateBackup = true;
 		public bool dailyRegistryBackups = true;
 		public bool logVerbose = false;
+		public bool bi32OnWin64 = false;
 
 		/// <summary>
 		/// Returns the absolute path to the RegistryBackups/Daily folder, not including trailing Path.DirectorySeparatorChar.  This method will also create that directory if it does not exist.

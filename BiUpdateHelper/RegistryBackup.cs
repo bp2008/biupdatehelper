@@ -34,7 +34,7 @@ namespace BiUpdateHelper
 						return;
 					if (!fi.Directory.Exists)
 						Directory.CreateDirectory(fi.Directory.FullName);
-					Process p = Process.Start("regedit.exe", "/e \"" + destinationFile + "\" \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Perspective Software\\Blue Iris\"");
+					Process p = Process.Start("regedit.exe", "/e \"" + destinationFile + "\" \"" + GetBlueIrisKeyPath() + "\"");
 					p.WaitForExit();
 					fi.Refresh();
 					if (fi.Exists)
@@ -44,7 +44,7 @@ namespace BiUpdateHelper
 					}
 					else
 					{
-						Logger.Info("Registry backup failed.  Probably, the registry key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\Perspective Software\\Blue Iris\" does not exist.");
+						Logger.Info("Registry backup failed.  Probably, the registry key \"" + GetBlueIrisKeyPath() + "\" does not exist.");
 					}
 				}
 				catch (ThreadAbortException)
@@ -58,6 +58,10 @@ namespace BiUpdateHelper
 			});
 			thr.Name = "Registry Backup";
 			thr.Start();
+		}
+		private static string GetBlueIrisKeyPath()
+		{
+			return "HKEY_LOCAL_MACHINE\\" + (Program.settings.bi32OnWin64 ? "Wow6432Node\\" : "") + "SOFTWARE\\Perspective Software\\Blue Iris";
 		}
 		private static void ZipFile(string SourcePath, string TargetFile)
 		{

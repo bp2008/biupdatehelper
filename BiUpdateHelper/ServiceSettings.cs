@@ -30,6 +30,7 @@ namespace BiUpdateHelper
 			cb_includeRegistryWithUpdateBackup.Checked = settings.includeRegistryWithUpdateBackup;
 			cb_dailyRegistryBackups.Checked = settings.dailyRegistryBackups;
 			cb_logVerbose.Checked = settings.logVerbose;
+			cb_BI32Win64.Checked = settings.bi32OnWin64;
 			isLoaded = true;
 		}
 
@@ -47,6 +48,8 @@ namespace BiUpdateHelper
 				settings.includeRegistryWithUpdateBackup = cb_includeRegistryWithUpdateBackup.Checked;
 				settings.dailyRegistryBackups = cb_dailyRegistryBackups.Checked;
 				settings.logVerbose = cb_logVerbose.Checked;
+				settings.bi32OnWin64 = cb_BI32Win64.Checked;
+				RegistryUtil.Force32BitRegistryAccess = settings.bi32OnWin64;
 
 				settings.Save();
 			}

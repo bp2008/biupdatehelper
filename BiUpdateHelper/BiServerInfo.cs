@@ -21,7 +21,7 @@ namespace BiUpdateHelper
 
 		public static void Reload()
 		{
-			RegistryKey server = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\server");
+			RegistryKey server = RegistryUtil.HKLM.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\server");
 			enabled = server.GetValue("enable").ToString() == "1";
 			if (enabled)
 			{
