@@ -37,8 +37,10 @@
 			this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
 			this.cb_includeRegistryWithUpdateBackup = new System.Windows.Forms.CheckBox();
 			this.cb_dailyRegistryBackups = new System.Windows.Forms.CheckBox();
-			this.btnViewRegistryBackups = new System.Windows.Forms.Button();
 			this.cb_BI32Win64 = new System.Windows.Forms.CheckBox();
+			this.btnViewRegistryBackups = new System.Windows.Forms.Button();
+			this.label2 = new System.Windows.Forms.Label();
+			this.btnLaunch32BitRegedit = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -118,16 +120,6 @@
 			this.cb_dailyRegistryBackups.UseVisualStyleBackColor = true;
 			this.cb_dailyRegistryBackups.CheckedChanged += new System.EventHandler(this.cb_CheckedChanged);
 			// 
-			// btnViewRegistryBackups
-			// 
-			this.btnViewRegistryBackups.Location = new System.Drawing.Point(174, 104);
-			this.btnViewRegistryBackups.Name = "btnViewRegistryBackups";
-			this.btnViewRegistryBackups.Size = new System.Drawing.Size(194, 23);
-			this.btnViewRegistryBackups.TabIndex = 5;
-			this.btnViewRegistryBackups.Text = "View Registry Backups";
-			this.btnViewRegistryBackups.UseVisualStyleBackColor = true;
-			this.btnViewRegistryBackups.Click += new System.EventHandler(this.btnViewRegistryBackups_Click);
-			// 
 			// cb_BI32Win64
 			// 
 			this.cb_BI32Win64.AutoSize = true;
@@ -141,11 +133,42 @@
 			this.cb_BI32Win64.UseVisualStyleBackColor = true;
 			this.cb_BI32Win64.CheckedChanged += new System.EventHandler(this.cb_CheckedChanged);
 			// 
+			// btnViewRegistryBackups
+			// 
+			this.btnViewRegistryBackups.Location = new System.Drawing.Point(174, 104);
+			this.btnViewRegistryBackups.Name = "btnViewRegistryBackups";
+			this.btnViewRegistryBackups.Size = new System.Drawing.Size(194, 23);
+			this.btnViewRegistryBackups.TabIndex = 5;
+			this.btnViewRegistryBackups.Text = "View Registry Backups";
+			this.btnViewRegistryBackups.UseVisualStyleBackColor = true;
+			this.btnViewRegistryBackups.Click += new System.EventHandler(this.btnViewRegistryBackups_Click);
+			// 
+			// label2
+			// 
+			this.label2.Location = new System.Drawing.Point(12, 174);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(256, 57);
+			this.label2.TabIndex = 8;
+			this.label2.Text = "Note: To restore registry backups of 32 bit Blue Iris taken on 64 bit Windows, us" +
+    "e the 32 bit regedit program.";
+			// 
+			// btnLaunch32BitRegedit
+			// 
+			this.btnLaunch32BitRegedit.Location = new System.Drawing.Point(274, 174);
+			this.btnLaunch32BitRegedit.Name = "btnLaunch32BitRegedit";
+			this.btnLaunch32BitRegedit.Size = new System.Drawing.Size(94, 41);
+			this.btnLaunch32BitRegedit.TabIndex = 9;
+			this.btnLaunch32BitRegedit.Text = "Launch 32 bit regedit";
+			this.btnLaunch32BitRegedit.UseVisualStyleBackColor = true;
+			this.btnLaunch32BitRegedit.Click += new System.EventHandler(this.btnLaunch32BitRegedit_Click);
+			// 
 			// ServiceSettings
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(380, 178);
+			this.ClientSize = new System.Drawing.Size(380, 226);
+			this.Controls.Add(this.btnLaunch32BitRegedit);
+			this.Controls.Add(this.label2);
 			this.Controls.Add(this.cb_BI32Win64);
 			this.Controls.Add(this.btnViewRegistryBackups);
 			this.Controls.Add(this.cb_dailyRegistryBackups);
@@ -175,5 +198,7 @@
 		private System.Windows.Forms.CheckBox cb_dailyRegistryBackups;
 		private System.Windows.Forms.Button btnViewRegistryBackups;
 		private System.Windows.Forms.CheckBox cb_BI32Win64;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Button btnLaunch32BitRegedit;
 	}
 }

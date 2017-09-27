@@ -34,7 +34,7 @@ namespace BiUpdateHelper
 						return;
 					if (!fi.Directory.Exists)
 						Directory.CreateDirectory(fi.Directory.FullName);
-					Process p = Process.Start("regedit.exe", "/e \"" + destinationFile + "\" \"" + GetBlueIrisKeyPath() + "\"");
+					Process p = Process.Start(GetRegeditPath(Program.settings.bi32OnWin64), "/e \"" + destinationFile + "\" \"" + GetBlueIrisKeyPath() + "\"");
 					p.WaitForExit();
 					fi.Refresh();
 					if (fi.Exists)
@@ -59,9 +59,17 @@ namespace BiUpdateHelper
 			thr.Name = "Registry Backup";
 			thr.Start();
 		}
+		public static string GetRegeditPath(bool x86)
+		{
+			string sysPath = "";
+			if (Environment.Is64BitOperatingSystem && Environment.Is64BitProcess && x86)
+				sysPath = Environment.GetFolderPath(Environment.SpecialFolder.Windows).TrimEnd(Path.DirectorySeparatorChar)
+					+ Path.DirectorySeparatorChar + "SysWOW64" + Path.DirectorySeparatorChar;
+			return sysPath + "regedit.exe";
+		}
 		private static string GetBlueIrisKeyPath()
 		{
-			return "HKEY_LOCAL_MACHINE\\" + (Program.settings.bi32OnWin64 ? "Wow6432Node\\" : "") + "SOFTWARE\\Perspective Software\\Blue Iris";
+			return "HKEY_LOCAL_MACHINE\\SOFTWARE\\Perspective Software\\Blue Iris";
 		}
 		private static void ZipFile(string SourcePath, string TargetFile)
 		{

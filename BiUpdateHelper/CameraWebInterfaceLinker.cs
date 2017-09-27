@@ -53,6 +53,11 @@ img
 				if (cameraNames.Length > 0)
 				{
 					BiServerInfo.Reload();
+					if (!BiServerInfo.enabled)
+					{
+						MessageBox.Show("This function is not supported on your system.  Possible reasons are that your Blue Iris version is older than this program was designed for, or your Blue Iris web server is not enabled.");
+						return;
+					}
 					BiUserInfo.Reload();
 					CookieAwareWebClient wc = new CookieAwareWebClient();
 					wc.Proxy = null;

@@ -60,5 +60,10 @@ namespace BiUpdateHelper
 		{
 			Process.Start(BiUpdateHelperSettings.GetRegistryBackupLocation());
 		}
+
+		private void btnLaunch32BitRegedit_Click(object sender, EventArgs e)
+		{
+			Process.Start(RegistryBackup.GetRegeditPath(true));
+		}
 	}
 }
