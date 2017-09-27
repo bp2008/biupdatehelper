@@ -55,9 +55,9 @@ namespace BiUpdateHelper
 		public UserInfo(RegistryKey key, string name)
 		{
 			this.name = name;
-			admin = key.GetValue("admin").ToString() == "1";
-			password_encoded = key.GetValue("password").ToString();
-			selgroups = key.GetValue("selgroups").ToString();
+			admin = RegistryUtil.GetStringValue(key, "admin") == "1";
+			password_encoded = RegistryUtil.GetStringValue(key, "password");
+			selgroups = RegistryUtil.GetStringValue(key, "selgroups");
 		}
 		public string GetDecodedPassword()
 		{

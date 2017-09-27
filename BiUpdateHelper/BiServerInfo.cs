@@ -24,28 +24,21 @@ namespace BiUpdateHelper
 			RegistryKey server = RegistryUtil.HKLM.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\server");
 			if (server == null)
 				return;
-			enabled = GetStringValue(server, "enable") == "1";
+			enabled = RegistryUtil.GetStringValue(server, "enable") == "1";
 			if (enabled)
 			{
 				try
 				{
-					lanIp = GetStringValue(server, "lanip");
-					port = int.Parse(GetStringValue(server, "port"));
-					authenticate = (AuthenticationMode)int.Parse(GetStringValue(server, "authenticate"));
-					secureonly = GetStringValue(server, "secureonly") == "1";
+					lanIp = RegistryUtil.GetStringValue(server, "lanip");
+					port = RegistryUtil.GetIntValue(server, "port", 80);
+					authenticate = (AuthenticationMode)RegistryUtil.GetIntValue(server, "authenticate", 0);
+					secureonly = RegistryUtil.GetStringValue(server, "secureonly") == "1";
 				}
-				finally
+				catch
 				{
 					enabled = false;
 				}
 			}
-		}
-		private static string GetStringValue(RegistryKey key, string name)
-		{
-			object obj = key.GetValue(name);
-			if (obj == null)
-				return "";
-			return obj.ToString();
 		}
 	}
 	public enum AuthenticationMode

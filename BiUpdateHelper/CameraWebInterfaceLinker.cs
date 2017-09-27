@@ -47,15 +47,25 @@ img
 			sb.AppendLine("<body>");
 			sb.AppendLine("<table><thead><tr><th>Camera Name</th><th>Short Name</th><th>Configuration URL</th><th>Snapshot</th></tr></thead><tbody>");
 			RegistryKey cameras = RegistryUtil.HKLM.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\Cameras");
-			if (cameras != null)
+			if (cameras == null)
+			{
+				MessageBox.Show("Could not find Blue Iris's camera list in the registry.  Either you have no cameras configured or your Blue Iris version is not compatible.");
+				return;
+			}
+			else
 			{
 				string[] cameraNames = cameras.GetSubKeyNames();
-				if (cameraNames.Length > 0)
+				if (cameraNames.Length == 0)
+				{
+					MessageBox.Show("No cameras were found in Blue Iris's registry settings.  Either you have no cameras configured or your Blue Iris version is not compatible.");
+					return;
+				}
+				else
 				{
 					BiServerInfo.Reload();
 					if (!BiServerInfo.enabled)
 					{
-						MessageBox.Show("This function is not supported on your system.  Possible reasons are that your Blue Iris version is older than this program was designed for, or your Blue Iris web server is not enabled.");
+						MessageBox.Show("This function is not supported on your system.  Possible reasons are that your Blue Iris version is incompatible, or your Blue Iris web server is not enabled.");
 						return;
 					}
 					BiUserInfo.Reload();

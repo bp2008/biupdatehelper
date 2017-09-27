@@ -48,5 +48,24 @@ namespace BiUpdateHelper
 				return defaultValue;
 			return (T)value;
 		}
+		public static string GetStringValue(RegistryKey key, string name)
+		{
+			object obj = key.GetValue(name);
+			if (obj == null)
+				return "";
+			return obj.ToString();
+		}
+		public static int GetIntValue(RegistryKey key, string name, int defaultValue)
+		{
+			object obj = key.GetValue(name);
+			if (obj == null)
+				return defaultValue;
+			if (typeof(int).IsAssignableFrom(obj.GetType()))
+				return (int)obj;
+			int val;
+			if (int.TryParse(obj.ToString(), out val))
+				return val;
+			return defaultValue;
+		}
 	}
 }
