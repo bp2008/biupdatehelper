@@ -44,6 +44,10 @@ There are 5 settings:
 
 Though it is not the primary purpose of this tool, clicking the "BI Registration Info" button will show you what registration key you used to activate Blue Iris 3 or Blue Iris 4.  This is helpful in case you've lost your registration key and you want to deactivate and reinstall on a new PC.
 
+## Restoring a registry backup created by BiUpdateHelper
+
+In most cases, you can simply decompress the .reg file and double-click it to restore.  However if you are using 32 bit Blue Iris on 64 bit Windows, then this procedure will not restore the registry settings to the correct location.  To correctly restore a 32 bit Blue Iris registry backup onto 64 bit Windows, open BiUpdateHelper's GUI, click Edit Service Settings, and click "Launch 32 bit regedit". Use Regedit's file menu to Import the desired .reg file.
+
 ## Issues
 
 Please report any defects using the project's Issues tab above.
