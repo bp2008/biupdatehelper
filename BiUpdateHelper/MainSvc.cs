@@ -16,7 +16,19 @@ namespace BiUpdateHelper
 {
 	public partial class MainSvc : ServiceBase
 	{
+		private int frozenStateCounter = 0;
+		private bool systemInFrozenState = false;
+		private bool blueIrisServiceStopping = false;
 		Thread thrMain;
+		/// <summary>
+		/// During one of Blue Iris's failures to shut down in a timely manner:
+		/// 1) Total system CPU usage typically hits 100.00% and stays there
+		/// 2) % Interrupt time goes into double-digits
+		/// 3) The number of System Calls/sec goes into the millions (an increase of over 10x from normal).
+		/// </summary>
+		PerformanceCounter cpuCounterTotal;
+		PerformanceCounter interruptCounterTotal;
+		//PerformanceCounter("System", "System Calls/sec", null);
 
 		public MainSvc()
 		{
@@ -49,6 +61,14 @@ namespace BiUpdateHelper
 		{
 			try
 			{
+				try
+				{
+					Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.AboveNormal;
+				}
+				catch (ThreadAbortException) { throw; }
+				catch { }
+				cpuCounterTotal = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+				interruptCounterTotal = new PerformanceCounter("Processor", "% Interrupt Time", "_Total");
 				DateTime lastDailyRegistryBackup = DateTime.MinValue;
 				while (true)
 				{
@@ -95,7 +115,19 @@ namespace BiUpdateHelper
 								}
 								else
 								{
-									// Blue Iris is not being updated in this directory.  Back up the update file if configured to do so.
+									// Blue Iris is not being updated in this directory.
+
+									if (Program.settings.killBlueIrisProcessesDuringUpdate && (blueIrisServiceStopping || systemInFrozenState))
+									{
+										mapping.KillBiProcs();
+
+										if (blueIrisServiceStopping)
+											Logger.Info("Blue Iris service found in stopping state. Killed Blue Iris processes.");
+										else if (systemInFrozenState)
+											Logger.Info("System freeze with high interrupt % detected. Killed Blue Iris processes.");
+									}
+
+									// Back up the update file if configured to do so.
 									if (!Program.settings.backupUpdateFiles)
 										continue;
 
@@ -189,6 +221,9 @@ namespace BiUpdateHelper
 
 		private List<BiUpdateMapping> GetUpdateInfo()
 		{
+			// This method must not be called too often if querying PerformanceCounter (at LEAST 100ms between calls or the returned data will be highly inaccurate).
+			systemInFrozenState = false;
+			blueIrisServiceStopping = false;
 			List<RelatedProcessInfo> allBiProcs = new List<RelatedProcessInfo>();
 			List<RelatedProcessInfo> allUpdateProcs = new List<RelatedProcessInfo>();
 			List<string> biPaths;
@@ -222,6 +257,11 @@ namespace BiUpdateHelper
 						}
 						allUpdateProcs.Add(new RelatedProcessInfo(p, name, path));
 					}
+					else if (!blueIrisServiceStopping && nameLower == "blueirisservice")
+					{
+						using (ServiceController sc = new ServiceController("BlueIris"))
+							blueIrisServiceStopping = sc.Status == ServiceControllerStatus.StopPending;
+					}
 				}
 				biPaths = hsBiPaths.ToList();
 			}
@@ -233,6 +273,18 @@ namespace BiUpdateHelper
 				Verbose("Found " + biProcs.Length + " blue iris processes and " + updateProcs.Length + " update processes running under path: " + path);
 				biUpdateMap.Add(new BiUpdateMapping(biProcs, updateProcs, path));
 			}
+			// Read performance counters to guess if the system is in a frozen state
+			float cpu = cpuCounterTotal.NextValue();
+			float interrupt = interruptCounterTotal.NextValue();
+			//float total = cpu + interrupt;
+			//File.AppendAllText(Globals.ApplicationDirectoryBase + "CPU.txt", DateTime.Now.ToString() + ": CPU % " + cpu + ", interrupt % " + interrupt + ", CPU + Interrupt: " + (cpu + interrupt) + Environment.NewLine);
+			if (biPaths.Count > 0 && Math.Abs(100f - cpu) < 0.05f && interrupt > 15)
+			{
+				systemInFrozenState = frozenStateCounter >= 1;
+				frozenStateCounter++;
+			}
+			else
+				frozenStateCounter = 0;
 			return biUpdateMap;
 		}
 

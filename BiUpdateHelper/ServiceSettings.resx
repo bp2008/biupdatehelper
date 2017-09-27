@@ -125,11 +125,21 @@
 
 On some systems with many cameras, Blue Iris cannot 
 stop itself gracefully, and it maxes out the CPU while it 
-shuts down over several minutes.  This can cause 
-updates to fail.
+shuts down over several minutes.  This can cause the 
+entire system to become unresponsive.
 
 This setting allows the helper service to kill Blue Iris 
-quickly the moment an update begins.</value>
+quickly when:
+
+1) A Blue Iris update begins
+2) The Blue Iris service enters the "stopping" state.
+3) The CPU reaches 100% utilization with at least 15% 
+of the time spent by "System interrupts".  This state 
+is never good, and typically indicates that Blue Iris is 
+freezing the system while slowly shutting down.
+
+If Blue Iris closes quickly on your system, you can safely 
+disable this setting.</value>
   </data>
   <data name="cb_backupUpdateFiles.ToolTip" xml:space="preserve">
     <value>(Default: enabled)
