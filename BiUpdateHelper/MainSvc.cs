@@ -99,7 +99,7 @@ namespace BiUpdateHelper
 								if (mapping.updateProcs.Length > 0)
 								{
 									// Blue Iris is currently being updated.  Kill the blueiris.exe processes if configured to do so.
-									Verbose("Blue Iris update detected in path: " + mapping.dirPath);
+									Logger.Info("Blue Iris update detected in path: " + mapping.dirPath);
 									if (Program.settings.includeRegistryWithUpdateBackup)
 									{
 										BiVersionInfo versionInfo = GetBiVersionInfo(mapping);
@@ -125,6 +125,7 @@ namespace BiUpdateHelper
 											Logger.Info("Blue Iris service found in stopping state. Killed Blue Iris processes.");
 										else if (systemInFrozenState)
 											Logger.Info("System freeze with high interrupt % detected. Killed Blue Iris processes.");
+										continue;
 									}
 
 									// Back up the update file if configured to do so.
@@ -143,6 +144,8 @@ namespace BiUpdateHelper
 
 									// Get Blue Iris process(es) (necessary to learn if it is 64 or 32 bit)
 									BiVersionInfo versionInfo = GetBiVersionInfo(mapping);
+									if (versionInfo == null)
+										continue; // BI is probably not running
 
 									FileInfo targetUpdateFile = new FileInfo(mapping.dirPath + "update" + versionInfo.cpu_32_64 + "_" + versionInfo.version + ".exe");
 									if (targetUpdateFile.Exists)
@@ -257,11 +260,11 @@ namespace BiUpdateHelper
 						}
 						allUpdateProcs.Add(new RelatedProcessInfo(p, name, path));
 					}
-					else if (!blueIrisServiceStopping && nameLower == "blueirisservice")
-					{
-						using (ServiceController sc = new ServiceController("BlueIris"))
-							blueIrisServiceStopping = sc.Status == ServiceControllerStatus.StopPending;
-					}
+					//else if (!blueIrisServiceStopping && nameLower == "blueirisservice")
+					//{ // DISABLED because this was aborting updates and leaving Blue Iris not running.
+					//	using (ServiceController sc = new ServiceController("BlueIris"))
+					//		blueIrisServiceStopping = sc.Status == ServiceControllerStatus.StopPending;
+					//}
 				}
 				biPaths = hsBiPaths.ToList();
 			}
