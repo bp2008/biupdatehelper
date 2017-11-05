@@ -41,6 +41,7 @@ namespace BiUpdateHelper
 					{
 						ZipFile(destinationFile, destinationFile + ".7z");
 						fi.Delete();
+						Logger.Info("Registry backup complete: " + destinationFile);
 					}
 					else
 					{

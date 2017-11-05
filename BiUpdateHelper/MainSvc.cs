@@ -16,7 +16,8 @@ namespace BiUpdateHelper
 {
 	public partial class MainSvc : ServiceBase
 	{
-		private int frozenStateCounter = 0;
+		private int frozenStateCounterA = 0;
+		private int frozenStateCounterB = 0;
 		private bool systemInFrozenState = false;
 		private bool blueIrisServiceStopping = false;
 		Thread thrMain;
@@ -107,7 +108,7 @@ namespace BiUpdateHelper
 									}
 									if (Program.settings.killBlueIrisProcessesDuringUpdate)
 									{
-										Verbose("Killing Blue Iris processes");
+										Verbose("Killing " + mapping.GetNumProcsLabel());
 										mapping.KillBiProcs();
 									}
 									Verbose("Waiting for update to complete");
@@ -122,9 +123,9 @@ namespace BiUpdateHelper
 										mapping.KillBiProcs();
 
 										if (blueIrisServiceStopping)
-											Logger.Info("Blue Iris service found in stopping state. Killed Blue Iris processes.");
+											Logger.Info("Blue Iris service found in stopping state. Killed " + mapping.GetNumProcsLabel());
 										else if (systemInFrozenState)
-											Logger.Info("System freeze with high interrupt % detected. Killed Blue Iris processes.");
+											Logger.Info("System freeze with high interrupt % detected. Killed " + mapping.GetNumProcsLabel());
 										continue;
 									}
 
@@ -283,11 +284,18 @@ namespace BiUpdateHelper
 			//File.AppendAllText(Globals.ApplicationDirectoryBase + "CPU.txt", DateTime.Now.ToString() + ": CPU % " + cpu + ", interrupt % " + interrupt + ", CPU + Interrupt: " + (cpu + interrupt) + Environment.NewLine);
 			if (biPaths.Count > 0 && Math.Abs(100f - cpu) < 0.05f && interrupt > 15)
 			{
-				systemInFrozenState = frozenStateCounter >= 1;
-				frozenStateCounter++;
+				systemInFrozenState = frozenStateCounterA >= 1;
+				frozenStateCounterA++;
 			}
 			else
-				frozenStateCounter = 0;
+				frozenStateCounterA = 0;
+			if (biPaths.Count > 0 /*&& Math.Abs(100f - cpu) < 0.05f*/ && interrupt > 12)
+			{
+				systemInFrozenState = frozenStateCounterB >= 2;
+				frozenStateCounterB++;
+			}
+			else
+				frozenStateCounterB = 0;
 			return biUpdateMap;
 		}
 
@@ -364,12 +372,21 @@ namespace BiUpdateHelper
 				try
 				{
 					if (!rpi.process.HasExited)
+					{
 						rpi.process.Kill();
+						if (Program.settings.logVerbose)
+							Logger.Info("Killed: " + rpi.path + ", PID: " + rpi.process.Id);
+					}
+					else
+					{
+						if (Program.settings.logVerbose)
+							Logger.Info("Already Exited: " + rpi.path + ", PID: " + rpi.process.Id);
+					}
 				}
 				catch (ThreadAbortException) { throw; }
 				catch (Exception ex)
 				{
-					Logger.Debug(ex, "Unable to kill process: " + rpi.path);
+					Logger.Debug(ex, "Unable to kill process: " + rpi.path + ", PID: " + rpi.process.Id);
 				}
 			}
 		}
@@ -395,6 +412,14 @@ namespace BiUpdateHelper
 					break;
 				Thread.Sleep(1000);
 			}
+		}
+		/// <summary>
+		/// Returns the number of Blue Iris processes that are mapped here followed by an appropriate label.  E.g. "1 Blue Iris process" or "2 Blue Iris processes".
+		/// </summary>
+		/// <returns></returns>
+		public string GetNumProcsLabel()
+		{
+			return biProcs.Length + " Blue Iris process" + (biProcs.Length == 1 ? "" : "es");
 		}
 	}
 }
