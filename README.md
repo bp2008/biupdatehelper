@@ -1,4 +1,4 @@
-# biupdatehelper
+# Blue Iris Update Helper
 
 This tool can do a number of things:
 
