@@ -50,7 +50,7 @@ To update: Stop the service, overwrite BiUpdateHelper.exe with the new version, 
 
 ## Configuration
 
-Clicking `Edit Service Settings` in the BiUpdateHelper Service Manager interface will open a dialog where you can edit 3 settings.
+Clicking `Edit Service Settings` in the BiUpdateHelper Service Manager interface will open a dialog.
 
 ![BiUpdateHelper Settings](http://i.imgur.com/52fQxhq.png)
 
