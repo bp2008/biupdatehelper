@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
@@ -27,6 +28,11 @@ namespace BiUpdateHelper
 
 			settings = new BiUpdateHelperSettings();
 			settings.Load();
+			if (string.IsNullOrWhiteSpace(settings.secret))
+			{
+				settings.secret = Hash.GetSHA256Hex(Guid.NewGuid().ToString());
+				settings.Save();
+			}
 			settings.SaveIfNoExist();
 
 			RegistryUtil.Force32BitRegistryAccess = settings.bi32OnWin64;
@@ -41,7 +47,8 @@ namespace BiUpdateHelper
 				ButtonDefinition btnSettings = new ButtonDefinition("Edit Service Settings", btnSettings_Click);
 				ButtonDefinition btnCameraConfigLinks = new ButtonDefinition("Camera Config Links", btnCameraConfigLinks_Click);
 				ButtonDefinition btnRegistryBackupNow = new ButtonDefinition("Take Registry Backup Now", btnRegistryBackupNow_Click);
-				ButtonDefinition[] customButtons = new ButtonDefinition[] { btnRegKey, btnSettings, btnCameraConfigLinks, btnRegistryBackupNow };
+				ButtonDefinition btnViewUsageStatistics = new ButtonDefinition("View Usage Statistics", btnViewUsageStatistics_Click);
+				ButtonDefinition[] customButtons = new ButtonDefinition[] { btnRegKey, btnSettings, btnCameraConfigLinks, btnRegistryBackupNow, btnViewUsageStatistics };
 
 				System.Windows.Forms.Application.Run(new ServiceManager(Title, ServiceName, customButtons));
 			}
@@ -99,6 +106,11 @@ namespace BiUpdateHelper
 		private static void btnRegistryBackupNow_Click(object sender, EventArgs e)
 		{
 			RegistryBackup.BackupNow(BiUpdateHelperSettings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg");
+		}
+
+		private static void btnViewUsageStatistics_Click(object sender, EventArgs e)
+		{
+			Process.Start("https://biupdatehelper.hopto.org/default.html#stats");
 		}
 	}
 }

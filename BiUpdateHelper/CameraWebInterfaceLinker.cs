@@ -108,10 +108,13 @@ img
 			File.WriteAllText(outPath, sb.ToString());
 			Process.Start(outPath);
 		}
-
-		private static string GetSecureAuthenticatedSession(WebClient wc)
+		public static string GetJsonURL()
 		{
-			string url = "http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/json";
+			return "http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/json";
+		}
+		public static string GetSecureAuthenticatedSession(WebClient wc)
+		{
+			string url = GetJsonURL();
 			string response = wc.UploadString(url, "{\"cmd\":\"login\"}");
 			Match m = Regex.Match(response, "\"session\": ?\"(.*?)\"");
 			if (!m.Success)

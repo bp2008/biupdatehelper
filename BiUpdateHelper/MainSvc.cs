@@ -77,6 +77,7 @@ namespace BiUpdateHelper
 					Verbose("Starting Iteration");
 					try
 					{
+						UsageInfoCollector.HandlePossibleUsageReport();
 						DateTime now = DateTime.Now;
 						if (lastDailyRegistryBackup.Year != now.Year || lastDailyRegistryBackup.Month != now.Month || lastDailyRegistryBackup.Day != now.Day)
 						{
@@ -314,7 +315,7 @@ namespace BiUpdateHelper
 			if (Program.settings.logVerbose)
 				Logger.Info(str);
 		}
-		private bool Is64Bit(Process p)
+		public static bool Is64Bit(Process p)
 		{
 			if (!Environment.Is64BitOperatingSystem)
 				return false;

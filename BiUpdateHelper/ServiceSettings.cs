@@ -25,6 +25,7 @@ namespace BiUpdateHelper
 		private void ServiceSettings_Load(object sender, EventArgs e)
 		{
 			isLoaded = false;
+			settings.Load();
 			cb_killBlueIrisProcessesDuringUpdate.Checked = settings.killBlueIrisProcessesDuringUpdate;
 			cb_backupUpdateFiles.Checked = settings.backupUpdateFiles;
 			cb_includeRegistryWithUpdateBackup.Checked = settings.includeRegistryWithUpdateBackup;
