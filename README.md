@@ -1,14 +1,40 @@
-# biupdatehelper
+# Blue Iris Update Helper
 
-This tool solves two common problems with Blue Iris updates.
+This tool can do a number of things:
 
-1) Reverting to previous versions.  Often, people install updates through the Blue Iris user interface (or allow Blue Iris to update itself automatically), and later discover they wish to revert to a previous update.  *But they don't have the old update files!*  This tool will automatically make backups of update files that Blue Iris has downloaded, so you may run the previous update files at any time.
+## 1) **Save a copy of your Blue Iris update files.**  
+Update Blue Iris with less worry that something will get broken.  This tool automatically makes a backup of every update file that Blue Iris downloads.
 
-2) Ensuring that Blue Iris closes itself for the update.  In some large systems with many cameras, Blue Iris fails to shut down gracefully during the update process.  This tool will automatically kill blueiris.exe whenever Blue Iris updates itself, or when you run any `update*.exe` within the same directory as BlueIris.exe.
+![Update Backups](https://i.imgur.com/bN5REZa.png)
 
-Additionally, this tool can back up Blue Iris's registry settings to aid in restoration of a previous version.  Restoring registry settings is not usually necessary, but when it is, **it really is**.
+## 2) **Make backups of Blue Iris's registry settings**  
+This tool automatically backs up Blue Iris's registry settings to aid in restoration of a previous version.  Restoring registry settings is not usually necessary, but when it is, you'll be glad you have backups.  By default, backups occur daily and again each time Blue Iris performs an update.
 
-## Installation
+![Registry Backups](https://i.imgur.com/dpIRjer.png)
+
+## 3) **Submit anonymous performance data**  
+Starting with version 1.6, BiUpdateHelper gathers performance data and uploads it anonymously to:
+
+https://biupdatehelper.hopto.org/default.html#stats  
+[![Performance Data](https://i.imgur.com/LfquxAw.png)](https://biupdatehelper.hopto.org/default.html#stats)  
+
+All collected data is freely available to anyone interested in seeing how well Blue Iris performs in different system configurations.  The data upload occurs weekly.
+
+## 4) **Help Blue Iris close itself**  
+In some large systems with many cameras, Blue Iris fails to close gracefully (notably, during updates).  When this happens, your system can go unresponsive.  This tool can detect when that occurs and assist by having Windows kill the Blue Iris process from the outside, effectively working around the issue.
+
+## 5) **Build a list of camera configuration links**  
+Keeping track of camera IP addresses is easy if you have this.
+
+![Camera Configuration Links](https://i.imgur.com/szkEXZ6.png)
+
+## 6) **Tell you your Blue Iris registration key, in case you lost it**  
+Your registration key is stored in the Windows Registry, and this tool can read it for you in case you lost it.  You'll need your key when you want to deactivate and reactivate your license on a different PC.
+
+![Recovered Keys](https://i.imgur.com/CMz51Qj.png)
+
+
+# Installation
 
 1) Download the latest release from the [releases section](https://github.com/bp2008/biupdatehelper/releases). **NOT the green `Clone or download` button**
 2) Extract to a directory of your choice.
@@ -16,7 +42,7 @@ Additionally, this tool can back up Blue Iris's registry settings to aid in rest
 4) Click `Install Service`.  The service will now auto-start when your computer boots.
 5) To start the service without rebooting, click `Start Service`.  You may now close the Service Manager and the program will continue running in the background.
 
-![BiUpdateHelper Service Manager](http://i.imgur.com/Ff4mFF0.png)
+![BiUpdateHelper Service Manager](https://i.imgur.com/103K8yq.png)
 
 ## Updating
 
@@ -24,7 +50,7 @@ To update: Stop the service, overwrite BiUpdateHelper.exe with the new version, 
 
 ## Configuration
 
-Clicking `Edit Service Settings` in the BiUpdateHelper Service Manager interface will open a dialog where you can edit 3 settings.
+Clicking `Edit Service Settings` in the BiUpdateHelper Service Manager interface will open a dialog.
 
 ![BiUpdateHelper Settings](http://i.imgur.com/52fQxhq.png)
 
