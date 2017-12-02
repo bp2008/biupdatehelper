@@ -77,7 +77,7 @@ namespace BiUpdateHelper
 					Verbose("Starting Iteration");
 					try
 					{
-						UsageInfoCollector.HandlePossibleUsageReport();
+						PerformanceDataCollector.HandlePossiblePerfDataReport();
 						DateTime now = DateTime.Now;
 						if (lastDailyRegistryBackup.Year != now.Year || lastDailyRegistryBackup.Month != now.Month || lastDailyRegistryBackup.Day != now.Day)
 						{

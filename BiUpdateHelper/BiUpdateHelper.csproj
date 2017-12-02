@@ -89,7 +89,13 @@
       <DependentUpon>ServiceSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="UsageInfoCollector.cs" />
+    <Compile Include="PerformanceDataCollector.cs" />
+    <Compile Include="PerformanceData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PerformanceData.Designer.cs">
+      <DependentUpon>PerformanceData.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -102,6 +108,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ServiceSettings.resx">
       <DependentUpon>ServiceSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PerformanceData.resx">
+      <DependentUpon>PerformanceData.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

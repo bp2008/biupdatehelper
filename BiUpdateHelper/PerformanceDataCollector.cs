@@ -56,13 +56,16 @@ namespace BiUpdateHelper
 		public string Name;
 		public string Version;
 	}
-	public static class UsageInfoCollector
+	public static class PerformanceDataCollector
 	{
-		private static DateTime startedUsageReportAt = DateTime.MinValue;
+		private static DateTime startedReportAt = DateTime.MinValue;
+		private static SemaphoreSlim sem = new SemaphoreSlim(1, 1);
+		private static bool uploadNextReport;
+		private static bool saveLocalNextReport;
 		/// <summary>
 		/// If it is time to submit an anonymous Blue Iris usage report, do it in a background thread.
 		/// </summary>
-		public static void HandlePossibleUsageReport()
+		public static void HandlePossiblePerfDataReport()
 		{
 			DateTime lastReportAt = TimeUtil.DateTimeFromEpochMS(Program.settings.lastUsageReportAt);
 			DateTime now = DateTime.UtcNow;
@@ -70,34 +73,56 @@ namespace BiUpdateHelper
 				lastReportAt = DateTime.MinValue;
 			if ((now - lastReportAt).TotalDays < 7)
 				return; // It hasn't been 7 days since the last report.  Don't generate a new report.
-			if ((now - startedUsageReportAt).TotalMinutes < 10)
+			if ((now - startedReportAt).TotalMinutes < 10)
 				return; // It hasn't been 10 minutes since the last attempt.  Don't generate a new report.
 
-			startedUsageReportAt = now;
-			Thread thrUsageReport = new Thread(UsageReportBackground);
-			thrUsageReport.Name = "Usage Report";
-			thrUsageReport.IsBackground = true;
-			thrUsageReport.Start();
+			CreatePerfDataReport(true, false);
+		}
+		/// <summary>
+		/// Starts a performance data (CPU usage) report on a background thread and returns true.  Returns false without starting a report if another report is currently being generated.
+		/// </summary>
+		/// <param name="upload">If true, the report will be uploaded to the website.</param>
+		/// <param name="saveLocal">If true, the report will be saved to perfdata.json in the current directory.</param>
+		/// <returns></returns>
+		public static bool CreatePerfDataReport(bool upload, bool saveLocal)
+		{
+			if (!sem.Wait(0))
+				return false;
+
+			uploadNextReport = upload;
+			saveLocalNextReport = saveLocal;
+
+			startedReportAt = DateTime.UtcNow;
+			Thread thrPerfDataReport = new Thread(PerfDataReportBackground);
+			thrPerfDataReport.Name = "Performance Report";
+			thrPerfDataReport.IsBackground = true;
+			thrPerfDataReport.Start();
+			return true;
 		}
 		/// <summary>
 		/// Submits a usage report synchronously.  Should be called from a background thread.
 		/// </summary>
-		private static void UsageReportBackground()
+		private static void PerfDataReportBackground()
 		{
 			try
 			{
 				// Generate record.
-				Upload_Record record = GetUsageRecord();
+				Upload_Record record = GetPerfDataRecord();
 				if (record == null)
 					return;
 
 				// Submit record.
-				//File.WriteAllText("UsageRecord.json", JsonConvert.SerializeObject(record, Formatting.Indented));
-				string jsonPayload = JsonConvert.SerializeObject(record);
-				string md5 = Hash.GetMD5Hex(jsonPayload);
-				using (WebClient wc = new WebClient())
+				if (saveLocalNextReport)
+					File.WriteAllText("perfdata.json", JsonConvert.SerializeObject(record, Formatting.Indented));
+
+				if (uploadNextReport)
 				{
-					wc.UploadString("https://biupdatehelper.hopto.org/api/uploadUsageRecord1", jsonPayload + md5);
+					string jsonPayload = JsonConvert.SerializeObject(record);
+					string md5 = Hash.GetMD5Hex(jsonPayload);
+					using (WebClient wc = new WebClient())
+					{
+						wc.UploadString("https://biupdatehelper.hopto.org/api/uploadUsageRecord1", jsonPayload + md5);
+					}
 				}
 
 				// Save the time so this doesn't happen again for a while.
@@ -108,14 +133,18 @@ namespace BiUpdateHelper
 			catch (ThreadAbortException) { }
 			catch (Exception ex)
 			{
-				Logger.Debug(ex, "Unable to generate anonymous usage record.");
+				Logger.Debug(ex, "Unable to generate anonymous performance data record.");
+			}
+			finally
+			{
+				sem.Release();
 			}
 		}
 		/// <summary>
 		/// Creates an anonymous usage record.  This method spends 10 seconds measuring CPU usage.  Returns null if any BlueIris.exe processes close while CPU usage is being measured, or if no BlueIris.exe processes were open.
 		/// </summary>
 		/// <returns></returns>
-		public static Upload_Record GetUsageRecord()
+		public static Upload_Record GetPerfDataRecord()
 		{
 			Upload_Record record = new Upload_Record();
 
@@ -128,7 +157,7 @@ namespace BiUpdateHelper
 				List<Process> biProcs = Process.GetProcesses().Where(p => p.ProcessName.ToLower() == "blueiris").ToList();
 				if (biProcs.Count < 1)
 				{
-					Logger.Info("Unable to generate anonymous usage record because Blue Iris is not running.");
+					Logger.Info("Unable to generate anonymous performance data record because Blue Iris is not running.");
 					return null;
 				}
 				TimeSpan[] startTimes = new TimeSpan[biProcs.Count];
@@ -149,7 +178,7 @@ namespace BiUpdateHelper
 					biProcs[i].Refresh();
 					if (biProcs[i].HasExited)
 					{
-						Logger.Info("Unable to generate anonymous usage record because Blue Iris exited while CPU usage was being measured.");
+						Logger.Info("Unable to generate anonymous performance data record because Blue Iris exited while CPU usage was being measured.");
 						return null;
 					}
 					totalTime += biProcs[i].TotalProcessorTime - startTimes[i];
@@ -224,7 +253,7 @@ namespace BiUpdateHelper
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex, "Unable to get usage data from web server.");
+					Logger.Debug(ex, "Error reading camera list from web server.");
 				}
 			}
 
@@ -239,10 +268,17 @@ namespace BiUpdateHelper
 					continue;
 				string shortName = RegistryUtil.GetStringValue(camKey, "shortname");
 				Upload_Camera cam = new Upload_Camera();
+
 				if (fpsMap.TryGetValue(shortName, out double fps))
-					cam.FPS = (byte)Math.Round(fps);
+					cam.FPS = (byte)NumberUtil.Clamp(Math.Round(fps), 0, 255);
 				else
-					cam.FPS = (byte)NumberUtil.Clamp(Math.Round(10000000.0 / RegistryUtil.GetIntValue(camKey, "interval", 1000000)), 0, 255);
+				{
+					int interval = RegistryUtil.GetIntValue(camKey, "interval", 1000000);
+					if (interval <= 0)
+						cam.FPS = 0;
+					else
+						cam.FPS = (byte)NumberUtil.Clamp(Math.Round(10000000.0 / interval), 0, 255);
+				}
 				cam.CapType = (byte)RegistryUtil.GetIntValue(camKey, "screencap", 0);
 				cam.Hwaccel = (byte)RegistryUtil.GetIntValue(camKey, "ip_hwaccel", 0);
 				cam.LimitDecode = RegistryUtil.GetIntValue(camKey, "smartdecode", 0) == 1;
