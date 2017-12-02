@@ -204,6 +204,7 @@
 			this.Controls.Add(this.label1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "RegKey";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Blue Iris Registration Info";
 			this.Load += new System.EventHandler(this.RegKey_Load);
 			this.ResumeLayout(false);

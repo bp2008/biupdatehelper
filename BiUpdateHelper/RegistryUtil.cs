@@ -30,6 +30,20 @@ namespace BiUpdateHelper
 					return RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32);
 			}
 		}
+		/// <summary>
+		/// Gets HKEY_CURRENT_USER in either the 32 or 64 bit view depending on RegistryUtil configuration and OS version.
+		/// </summary>
+		/// <returns></returns>
+		public static RegistryKey HKCU
+		{
+			get
+			{
+				if (!Force32BitRegistryAccess && Environment.Is64BitOperatingSystem)
+					return RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry64);
+				else
+					return RegistryKey.OpenBaseKey(RegistryHive.CurrentUser, RegistryView.Registry32);
+			}
+		}
 
 		/// <summary>
 		/// Returns the requested RegistryKey or null if the key does not exist.
@@ -39,6 +53,15 @@ namespace BiUpdateHelper
 		public static RegistryKey GetHKLMKey(string path)
 		{
 			return HKLM.OpenSubKey(path);
+		}
+		/// <summary>
+		/// Returns the requested RegistryKey or null if the key does not exist.
+		/// </summary>
+		/// <param name="path">A path relative to HKEY_LOCAL_MACHINE.  E.g. "SOFTWARE\\Microsoft"</param>
+		/// <returns></returns>
+		public static RegistryKey GetHKCUKey(string path)
+		{
+			return HKCU.OpenSubKey(path);
 		}
 
 		public static T GetHKLMValue<T>(string path, string key, T defaultValue)

@@ -90,6 +90,7 @@
 			this.Controls.Add(this.btnView);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
 			this.Name = "PerformanceData";
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Performance Data";
 			this.ResumeLayout(false);
 

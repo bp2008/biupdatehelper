@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -33,7 +34,13 @@ namespace BiUpdateHelper
 		public byte HwAccel;
 		public float RamGiB;
 		public ushort RamChannels;
+		public string DimmLocations; // New in v2
 		public ushort RamMHz;
+		public bool ServiceMode; // New in v2
+		public bool ConsoleOpen; // New in v2
+		public short ConsoleWidth = -1; // New in v2
+		public short ConsoleHeight = -1; // New in v2
+		public short LivePreviewFPS = -1; // New in v2
 		public Upload_Camera[] cameras;
 		public Upload_Gpu[] gpus;
 	}
@@ -121,7 +128,7 @@ namespace BiUpdateHelper
 					string md5 = Hash.GetMD5Hex(jsonPayload);
 					using (WebClient wc = new WebClient())
 					{
-						wc.UploadString("https://biupdatehelper.hopto.org/api/uploadUsageRecord1", jsonPayload + md5);
+						wc.UploadString("https://biupdatehelper.hopto.org/api/uploadUsageRecord2", jsonPayload + md5);
 					}
 				}
 
@@ -188,17 +195,58 @@ namespace BiUpdateHelper
 
 				long physicalMemUsage = 0;
 				long virtualMemUsage = 0;
-				int n = 0;
 				foreach (Process p in biProcs)
 				{
 					if (record.BiVersion == null)
 						record.BiVersion = p.MainModule.FileVersionInfo.FileVersion + " " + (MainSvc.Is64Bit(p) ? "x64" : "x86");
 					physicalMemUsage += p.WorkingSet64;
 					virtualMemUsage += p.VirtualMemorySize64;
-					n++;
 				}
 				record.BiMemUsageMB = (int)(physicalMemUsage / 1000000);
 				record.BiPeakVirtualMemUsageMB = (int)(virtualMemUsage / 1000000);
+
+				foreach (Process p in biProcs)
+				{
+					IntPtr handle = p.MainWindowHandle;
+					if (handle == IntPtr.Zero)
+					{
+						// This is the service.
+					}
+					else
+					{
+						// This is the console.
+						record.ConsoleOpen = true;
+						try
+						{
+							WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
+							if (GetWindowPlacement(handle, ref placement))
+							{
+								if (placement.showCmd == 2)
+								{
+									// Minimized
+									record.ConsoleWidth = -2;
+									record.ConsoleHeight = -2;
+								}
+								else
+								{
+									// Not Minimized
+									RECT Rect = new RECT();
+									if (GetWindowRect(handle, ref Rect))
+									{
+										record.ConsoleWidth = (short)NumberUtil.Clamp(Rect.right - Rect.left, 0, short.MaxValue);
+										record.ConsoleHeight = (short)NumberUtil.Clamp(Rect.bottom - Rect.top, 0, short.MaxValue);
+									}
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							Logger.Debug(ex);
+						}
+					}
+				}
+				if (biProcs.Count > 1 && !record.ConsoleOpen)
+					record.ConsoleOpen = true;
 			}
 
 			record.Secret = Program.settings.secret;
@@ -216,6 +264,11 @@ namespace BiUpdateHelper
 			}
 			record.HelperVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 			record.HwAccel = (byte)RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "hwaccel", 0);
+			record.ServiceMode = RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "Service", 0) == 1;
+			if (RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "limitlive", 0) == 0)
+				record.LivePreviewFPS = -2;
+			else
+				record.LivePreviewFPS = (short)RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "livefps", -1);
 
 			ComputerInfo computerInfo = new ComputerInfo();
 			record.MemMB = (int)(computerInfo.TotalPhysicalMemory / 1000000);
@@ -224,6 +277,7 @@ namespace BiUpdateHelper
 			RamInfo ramInfo = GetRamInfo();
 			record.RamGiB = ramInfo.GiB;
 			record.RamChannels = ramInfo.Channels;
+			record.DimmLocations = ramInfo.DimmLocations;
 			record.RamMHz = ramInfo.MHz;
 
 			// Get camera info.
@@ -437,12 +491,14 @@ namespace BiUpdateHelper
 			public float GiB;
 			public ushort Channels;
 			public ushort MHz;
+			public string DimmLocations;
 			public RamInfo() { }
-			public RamInfo(float GiB, ushort Channels, ushort MHz)
+			public RamInfo(float GiB, ushort Channels, ushort MHz, string DimmLocations)
 			{
 				this.GiB = GiB;
 				this.Channels = Channels;
 				this.MHz = MHz;
+				this.DimmLocations = DimmLocations;
 			}
 		}
 		private static Regex rxGetChannel = new Regex("Channel(.+)-", RegexOptions.Compiled);
@@ -457,8 +513,10 @@ namespace BiUpdateHelper
 			HashSet<string> channels = new HashSet<string>();
 			long capacity = 0;
 			int speed = 0;
+			List<string> DimmLocations = new List<string>();
 			foreach (RamInfo_Internal dimm in dimms)
 			{
+				DimmLocations.Add(dimm.DeviceLocator);
 				Match m = rxGetChannel.Match(dimm.DeviceLocator);
 				if (m.Success)
 					channels.Add(m.Groups[1].Value);
@@ -466,7 +524,33 @@ namespace BiUpdateHelper
 				if (speed == 0)
 					speed = dimm.Speed;
 			}
-			return new RamInfo((float)NumberUtil.BytesToGiB(capacity), (ushort)channels.Count, (ushort)speed);
+			return new RamInfo((float)NumberUtil.BytesToGiB(capacity), (ushort)channels.Count, (ushort)speed, string.Join(";", DimmLocations));
+		}
+
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct RECT
+		{
+			public int left;
+			public int top;
+			public int right;
+			public int bottom;
+		}
+
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
+		static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+
+		private struct WINDOWPLACEMENT
+		{
+			public int length;
+			public int flags;
+			public int showCmd;
+			public System.Drawing.Point ptMinPosition;
+			public System.Drawing.Point ptMaxPosition;
+			public System.Drawing.Rectangle rcNormalPosition;
 		}
 	}
 }
