@@ -27,6 +27,7 @@ namespace BiUpdateHelper
 		public int CpuMHz;
 		public byte CpuUsage;
 		public byte BiCpuUsage;
+		public short CpuThreads; // New in v2(.1)
 		public int MemMB;
 		public int BiMemUsageMB;
 		public int BiPeakVirtualMemUsageMB;
@@ -192,6 +193,7 @@ namespace BiUpdateHelper
 				}
 				double fraction = totalTime.TotalMilliseconds / sw.Elapsed.TotalMilliseconds;
 				record.BiCpuUsage = (byte)Math.Round((fraction / Environment.ProcessorCount) * 100);
+				record.CpuThreads = (short)Environment.ProcessorCount;
 
 				long physicalMemUsage = 0;
 				long virtualMemUsage = 0;
