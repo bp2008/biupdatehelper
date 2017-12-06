@@ -403,11 +403,11 @@ namespace BiUpdateHelper
 			public string clockSpeed, maxClockSpeed, procName, manufacturer, version;
 			public CpuInfo(ManagementObject obj)
 			{
-				maxClockSpeed = obj["MaxClockSpeed"].ToString();
-				clockSpeed = obj["CurrentClockSpeed"].ToString();
-				procName = obj["Name"].ToString();
-				manufacturer = obj["Manufacturer"].ToString();
-				version = obj["Version"].ToString();
+				maxClockSpeed = DeNullify.ToString(obj["MaxClockSpeed"]);
+				clockSpeed = DeNullify.ToString(obj["CurrentClockSpeed"]);
+				procName = DeNullify.ToString(obj["Name"]);
+				manufacturer = DeNullify.ToString(obj["Manufacturer"]);
+				version = DeNullify.ToString(obj["Version"]);
 			}
 			public string GetModel()
 			{
@@ -430,8 +430,11 @@ namespace BiUpdateHelper
 			{
 				foreach (ManagementObject obj in win32Proc.Get())
 				{
-					CpuInfo info = new CpuInfo(obj);
-					return info;
+					if (obj != null)
+					{
+						CpuInfo info = new CpuInfo(obj);
+						return info;
+					}
 				}
 			}
 			return null;
@@ -445,8 +448,8 @@ namespace BiUpdateHelper
 			}
 			public GpuInfo(ManagementObject obj)
 			{
-				Name = obj["Name"].ToString();
-				DriverVersion = obj["DriverVersion"].ToString();
+				Name = DeNullify.ToString(obj["Name"]);
+				DriverVersion = DeNullify.ToString(obj["DriverVersion"]);
 			}
 		}
 		public static List<GpuInfo> GetGpuInfo()
@@ -456,7 +459,8 @@ namespace BiUpdateHelper
 
 				List<GpuInfo> gpus = new List<GpuInfo>();
 				foreach (ManagementObject obj in objSearcher.Get())
-					gpus.Add(new GpuInfo(obj));
+					if (obj != null)
+						gpus.Add(new GpuInfo(obj));
 				return gpus;
 			}
 		}
@@ -468,9 +472,9 @@ namespace BiUpdateHelper
 			public RamInfo_Internal() { }
 			public RamInfo_Internal(ManagementObject obj)
 			{
-				Capacity = NumberUtil.ParseLong(obj["Capacity"].ToString());
-				DeviceLocator = obj["DeviceLocator"].ToString();
-				Speed = NumberUtil.ParseInt(obj["Speed"].ToString());
+				Capacity = NumberUtil.ParseLong(DeNullify.ToString(obj["Capacity"]));
+				DeviceLocator = DeNullify.ToString(obj["DeviceLocator"]);
+				Speed = NumberUtil.ParseInt(DeNullify.ToString(obj["Speed"]));
 				//sb.AppendLine("Bank Label: " + obj["BankLabel"]);
 				//sb.AppendLine("Capacity: " + obj["Capacity"]);
 				//sb.AppendLine("Data Width: " + obj["DataWidth"]);
@@ -510,7 +514,8 @@ namespace BiUpdateHelper
 			using (ManagementObjectSearcher win32Memory = new ManagementObjectSearcher("select * from Win32_PhysicalMemory"))
 			{
 				foreach (ManagementObject obj in win32Memory.Get())
-					dimms.Add(new RamInfo_Internal(obj));
+					if (obj != null)
+						dimms.Add(new RamInfo_Internal(obj));
 			}
 			HashSet<string> channels = new HashSet<string>();
 			long capacity = 0;
@@ -528,7 +533,16 @@ namespace BiUpdateHelper
 			}
 			return new RamInfo((float)NumberUtil.BytesToGiB(capacity), (ushort)channels.Count, (ushort)speed, string.Join(";", DimmLocations));
 		}
-
+		private static class DeNullify
+		{
+			public static string ToString(object obj)
+			{
+				if (obj == null)
+					return "";
+				else
+					return obj.ToString();
+			}
+		}
 		[DllImport("user32.dll", SetLastError = true)]
 		static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
 
