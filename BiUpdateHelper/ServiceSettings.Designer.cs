@@ -55,6 +55,7 @@
 			// cb_killBlueIrisProcessesDuringUpdate
 			// 
 			this.cb_killBlueIrisProcessesDuringUpdate.AutoSize = true;
+			this.cb_killBlueIrisProcessesDuringUpdate.Enabled = false;
 			this.cb_killBlueIrisProcessesDuringUpdate.Location = new System.Drawing.Point(12, 39);
 			this.cb_killBlueIrisProcessesDuringUpdate.Name = "cb_killBlueIrisProcessesDuringUpdate";
 			this.cb_killBlueIrisProcessesDuringUpdate.Size = new System.Drawing.Size(205, 17);
@@ -62,6 +63,7 @@
 			this.cb_killBlueIrisProcessesDuringUpdate.Text = "Help Blue Iris close itself as necessary";
 			this.toolTip1.SetToolTip(this.cb_killBlueIrisProcessesDuringUpdate, resources.GetString("cb_killBlueIrisProcessesDuringUpdate.ToolTip"));
 			this.cb_killBlueIrisProcessesDuringUpdate.UseVisualStyleBackColor = true;
+			this.cb_killBlueIrisProcessesDuringUpdate.Visible = false;
 			this.cb_killBlueIrisProcessesDuringUpdate.CheckedChanged += new System.EventHandler(this.cb_CheckedChanged);
 			// 
 			// cb_backupUpdateFiles

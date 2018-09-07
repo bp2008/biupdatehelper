@@ -107,11 +107,11 @@ namespace BiUpdateHelper
 										BiVersionInfo versionInfo = GetBiVersionInfo(mapping);
 										TryBackupRegistryForBiVersion(versionInfo);
 									}
-									if (Program.settings.killBlueIrisProcessesDuringUpdate)
-									{
-										Verbose("Killing " + mapping.GetNumProcsLabel());
-										mapping.KillBiProcs();
-									}
+									//if (Program.settings.killBlueIrisProcessesDuringUpdate)
+									//{
+									//	Verbose("Killing " + mapping.GetNumProcsLabel());
+									//	mapping.KillBiProcs();
+									//}
 									Verbose("Waiting for update to complete");
 									mapping.WaitUntilUpdateProcsStop(TimeSpan.FromMinutes(5));
 								}
@@ -119,16 +119,16 @@ namespace BiUpdateHelper
 								{
 									// Blue Iris is not being updated in this directory.
 
-									if (Program.settings.killBlueIrisProcessesDuringUpdate && (blueIrisServiceStopping || systemInFrozenState))
-									{
-										mapping.KillBiProcs();
+									//if (Program.settings.killBlueIrisProcessesDuringUpdate && (blueIrisServiceStopping || systemInFrozenState))
+									//{
+									//	mapping.KillBiProcs();
 
-										if (blueIrisServiceStopping)
-											Logger.Info("Blue Iris service found in stopping state. Killed " + mapping.GetNumProcsLabel());
-										else if (systemInFrozenState)
-											Logger.Info("System freeze with high interrupt % detected. Killed " + mapping.GetNumProcsLabel());
-										continue;
-									}
+									//	if (blueIrisServiceStopping)
+									//		Logger.Info("Blue Iris service found in stopping state. Killed " + mapping.GetNumProcsLabel());
+									//	else if (systemInFrozenState)
+									//		Logger.Info("System freeze with high interrupt % detected. Killed " + mapping.GetNumProcsLabel());
+									//	continue;
+									//}
 
 									// Back up the update file if configured to do so.
 									if (!Program.settings.backupUpdateFiles)
