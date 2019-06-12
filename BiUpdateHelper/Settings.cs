@@ -15,7 +15,7 @@ namespace BiUpdateHelper
 		///// <summary>
 		///// If true, the helper service will step-in and kill the Blue Iris process during BI updates and when it is believed that BI is trying to shut down.
 		///// </summary>
-		//public bool killBlueIrisProcessesDuringUpdate = true;
+		public bool killBlueIrisProcessesDuringUpdate2 = false;
 		public bool backupUpdateFiles = true;
 		public bool includeRegistryWithUpdateBackup = true;
 		public bool dailyRegistryBackups = true;

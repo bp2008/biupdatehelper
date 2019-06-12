@@ -26,7 +26,7 @@ namespace BiUpdateHelper
 		{
 			isLoaded = false;
 			settings.Load();
-			//cb_killBlueIrisProcessesDuringUpdate.Checked = settings.killBlueIrisProcessesDuringUpdate;
+			cb_killBlueIrisProcessesDuringUpdate.Checked = settings.killBlueIrisProcessesDuringUpdate2;
 			cb_backupUpdateFiles.Checked = settings.backupUpdateFiles;
 			cb_includeRegistryWithUpdateBackup.Checked = settings.includeRegistryWithUpdateBackup;
 			cb_dailyRegistryBackups.Checked = settings.dailyRegistryBackups;
@@ -44,7 +44,7 @@ namespace BiUpdateHelper
 		{
 			if (isLoaded)
 			{
-				//settings.killBlueIrisProcessesDuringUpdate = cb_killBlueIrisProcessesDuringUpdate.Checked;
+				settings.killBlueIrisProcessesDuringUpdate2 = cb_killBlueIrisProcessesDuringUpdate.Checked;
 				settings.backupUpdateFiles = cb_backupUpdateFiles.Checked;
 				settings.includeRegistryWithUpdateBackup = cb_includeRegistryWithUpdateBackup.Checked;
 				settings.dailyRegistryBackups = cb_dailyRegistryBackups.Checked;

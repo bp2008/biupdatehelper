@@ -121,12 +121,12 @@
     <value>17, 17</value>
   </metadata>
   <data name="cb_killBlueIrisProcessesDuringUpdate.ToolTip" xml:space="preserve">
-    <value>NOTE: This feature is disabled since v1.6.4 because 
-Blue Iris has made recent attempts to solve its 
+    <value>NOTE: This feature is not recommended because 
+Blue Iris has made attempts to solve its 
 shutdown problem itself, and this feature began 
 interfering with normal updates on some systems.
 
-(Default: enabled)
+(Default: disabled)
 
 On some systems with many cameras, Blue Iris cannot 
 stop itself gracefully, and it maxes out the CPU while it 

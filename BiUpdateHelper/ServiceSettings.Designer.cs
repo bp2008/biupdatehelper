@@ -55,7 +55,6 @@
 			// cb_killBlueIrisProcessesDuringUpdate
 			// 
 			this.cb_killBlueIrisProcessesDuringUpdate.AutoSize = true;
-			this.cb_killBlueIrisProcessesDuringUpdate.Enabled = false;
 			this.cb_killBlueIrisProcessesDuringUpdate.Location = new System.Drawing.Point(12, 39);
 			this.cb_killBlueIrisProcessesDuringUpdate.Name = "cb_killBlueIrisProcessesDuringUpdate";
 			this.cb_killBlueIrisProcessesDuringUpdate.Size = new System.Drawing.Size(205, 17);
