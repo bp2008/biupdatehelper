@@ -56,6 +56,8 @@ namespace BiUpdateHelper
 								/// </summary>
 		public float Total_MPPS; // New in 1.6.4.3, ignored by server
 		public byte webserverState = 0; // New in 1.7.0.0. Can be used to better determine which fields are accurate.  0: Failed to get things from web server. 1: Got all non-admin things. 2: Got all admin-requiring things.
+		public bool ProfileConfirmed; // New in 1.7.1.0. Indicates that the profile number came from the web server so related settings can be considered reliable.
+		public bool AllFPSConfirmed; // New in 1.7.1.0. True if all the FPS values came from the web server and are therefore reliable.
 		public Upload_Camera[] cameras;
 		public Upload_Gpu[] gpus;
 	}
@@ -63,6 +65,7 @@ namespace BiUpdateHelper
 	{
 		public int Pixels;
 		public byte FPS;
+		public bool FPSConfirmed; // New in 1.7.1.0. True if the FPS came from the web server and is therefore reliable.
 		public bool LimitDecode;
 		public byte Hwaccel;
 		public byte Type;
@@ -261,6 +264,8 @@ namespace BiUpdateHelper
 										currentProfile = 1;
 										gotStatus = false;
 									}
+									else
+										record.ProfileConfirmed = true;
 								}
 							}
 							catch (Exception ex)
@@ -298,7 +303,10 @@ namespace BiUpdateHelper
 				Upload_Camera cam = new Upload_Camera();
 
 				if (fpsMap.TryGetValue(camSrc.shortname, out double fps))
+				{
 					cam.FPS = (byte)Math.Round(fps).Clamp(0, 255);
+					cam.FPSConfirmed = true;
+				}
 				else
 					cam.FPS = (byte)(Math.Round(camSrc.MaxRate).Clamp(0, 255));
 				cam.CapType = (byte)camSrc.CapType;
@@ -314,6 +322,7 @@ namespace BiUpdateHelper
 				cameras.Add(cam);
 			}
 
+			record.AllFPSConfirmed = cameras.All(cam => cam.FPSConfirmed); // Ignored and recalculated by server. This exists here for the sake of local json output.
 			record.cameras = cameras.ToArray();
 			record.gpus = c.gpus.Select(g => new Upload_Gpu() { Name = g.Name, Version = g.DriverVersion }).ToArray();
 
