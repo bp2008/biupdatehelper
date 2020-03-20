@@ -11,6 +11,7 @@ namespace BiUpdateHelper
 	public static class BiServerInfo
 	{
 		public static string lanIp { get; private set; }
+		public static bool bindLanIpOnly { get; private set; }
 		public static int port { get; private set; }
 		public static bool enabled { get; private set; }
 		public static bool secureonly { get; private set; }
@@ -30,7 +31,8 @@ namespace BiUpdateHelper
 			{
 				try
 				{
-					lanIp = IPAddress.Loopback.ToString();// RegistryUtil.GetStringValue(server, "lanip");
+					lanIp = RegistryUtil.GetStringValue(server, "lanip");
+					bindLanIpOnly = RegistryUtil.GetStringValue(server, "bind") == "1";
 					port = RegistryUtil.GetIntValue(server, "port", 80);
 					authenticate = (AuthenticationMode)RegistryUtil.GetIntValue(server, "authenticate", 0);
 					secureonly = RegistryUtil.GetStringValue(server, "secureonly") == "1";
@@ -40,6 +42,18 @@ namespace BiUpdateHelper
 					enabled = false;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Returns the best IP address to use for connecting to the web server.
+		/// </summary>
+		/// <returns></returns>
+		public static string GetWebserverIp()
+		{
+			if (bindLanIpOnly)
+				return lanIp;
+			else
+				return IPAddress.Loopback.ToString();
 		}
 	}
 	public enum AuthenticationMode

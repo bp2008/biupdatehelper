@@ -78,7 +78,7 @@ img
 						{
 							UserInfo user = BiUserInfo.CreateTemporaryUser();
 							session = GetSecureAuthenticatedSession(wc, out bool isAdmin, user.name, user.GetDecodedPassword());
-							wc.CookieContainer.Add(new Cookie("session", session, "/", BiServerInfo.lanIp));
+							wc.CookieContainer.Add(new Cookie("session", session, "/", BiServerInfo.GetWebserverIp()));
 						}
 						catch (Exception ex)
 						{
@@ -118,7 +118,7 @@ img
 		}
 		public static string GetJsonURL()
 		{
-			return "http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/json";
+			return "http://" + BiServerInfo.GetWebserverIp() + ":" + BiServerInfo.port + "/json";
 		}
 		public static string GetSecureAuthenticatedSession(WebClient wc, out bool isAdmin, string user, string pass)
 		{
@@ -160,7 +160,7 @@ img
 		{
 			try
 			{
-				byte[] jpeg = wc.DownloadData("http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/image/" + shortName + "?&w=160&q=25");
+				byte[] jpeg = wc.DownloadData("http://" + BiServerInfo.GetWebserverIp() + ":" + BiServerInfo.port + "/image/" + shortName + "?&w=160&q=25");
 				return "data:image/jpg;base64," + Convert.ToBase64String(jpeg);
 			}
 			catch { return ""; }
