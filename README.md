@@ -81,3 +81,7 @@ Please report any defects using the project's Issues tab above.
 ## Notes
 
 When this program backs up the registry, it exports `HKEY_LOCAL_MACHINE\SOFTWARE\Perspective Software\Blue Iris`.  On systems I have inspected, there is a second, much smaller set of registry entries `HKEY_CURRENT_USER\SOFTWARE\Perspective Software\Blue Iris` which is not backed up because I have not seen this used for anything more important than remembering the last window position.
+
+## Discuss on IpCamTalk
+
+https://ipcamtalk.com/threads/blue-iris-update-helper-biupdatehelper.18667
