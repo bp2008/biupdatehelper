@@ -37,6 +37,7 @@
     <NoWarn>
     </NoWarn>
   </PropertyGroup>
+  <PropertyGroup />
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
@@ -125,6 +126,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\BlueIrisRegistryReader\BlueIrisRegistryReader\BlueIrisRegistryReader.csproj">
+      <Project>{2988730a-35fc-4eb0-aa52-21264b8f4540}</Project>
+      <Name>BlueIrisRegistryReader</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\BPUtil\BPUtil\BPUtil.csproj">
       <Project>{a4981d8d-debf-4b34-b9ce-ff25520a02b7}</Project>
       <Name>BPUtil</Name>

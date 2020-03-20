@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using BlueIrisRegistryReader;
 using BPUtil;
 using Microsoft.VisualBasic.Devices;
 using Microsoft.Win32;
@@ -42,6 +43,19 @@ namespace BiUpdateHelper
 		public short ConsoleWidth = -1; // New in v2
 		public short ConsoleHeight = -1; // New in v2
 		public short LivePreviewFPS = -1; // New in v2
+										  /// <summary>
+										  /// Total number of pixels, in millions, of all cameras together.
+										  /// </summary>
+		public float Total_Megapixels; // New in 1.6.4.3, ignored by server
+									   /// <summary>
+									   /// Total number of frames per second being input into the system.
+									   /// </summary>
+		public float Total_FPS; // New in 1.6.4.3, ignored by server
+								/// <summary>
+								/// Megapixels per second being input into the system.
+								/// </summary>
+		public float Total_MPPS; // New in 1.6.4.3, ignored by server
+		public byte webserverState = 0; // New in 1.7.0.0. Can be used to better determine which fields are accurate.  0: Failed to get things from web server. 1: Got all non-admin things. 2: Got all admin-requiring things.
 		public Upload_Camera[] cameras;
 		public Upload_Gpu[] gpus;
 	}
@@ -81,8 +95,8 @@ namespace BiUpdateHelper
 				lastReportAt = DateTime.MinValue;
 			if ((now - lastReportAt).TotalDays < 7)
 				return; // It hasn't been 7 days since the last report.  Don't generate a new report.
-			if ((now - startedReportAt).TotalMinutes < 10)
-				return; // It hasn't been 10 minutes since the last attempt.  Don't generate a new report.
+			if ((now - startedReportAt).TotalMinutes < 60)
+				return; // It hasn't been 60 minutes since the last attempt.  Don't generate a new report.
 
 			CreatePerfDataReport(true, false);
 		}
@@ -156,202 +170,161 @@ namespace BiUpdateHelper
 		{
 			Upload_Record record = new Upload_Record();
 
-			// Begin measuring CPU usage.
-			using (PerformanceCounter totalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total"))
-			{
-				totalCpuCounter.NextValue();
-				Stopwatch sw = new Stopwatch();
-				sw.Start();
-				List<Process> biProcs = Process.GetProcesses().Where(p => p.ProcessName.ToLower() == "blueiris").ToList();
-				if (biProcs.Count < 1)
-				{
-					Logger.Info("Unable to generate anonymous performance data record because Blue Iris is not running.");
-					return null;
-				}
-				TimeSpan[] startTimes = new TimeSpan[biProcs.Count];
-				for (int i = 0; i < biProcs.Count; i++)
-				{
-					startTimes[i] = biProcs[i].TotalProcessorTime;
-				}
+			BlueIrisConfiguration c = new BlueIrisConfiguration();
+			c.Load();
 
-				// Wait for CPU usage to happen.
-				Thread.Sleep(10000);
-
-				// Take CPU usage measurements.
-				record.CpuUsage = (byte)Math.Round(totalCpuCounter.NextValue());
-				sw.Stop();
-				TimeSpan totalTime = TimeSpan.Zero;
-				for (int i = 0; i < biProcs.Count; i++)
-				{
-					biProcs[i].Refresh();
-					if (biProcs[i].HasExited)
-					{
-						Logger.Info("Unable to generate anonymous performance data record because Blue Iris exited while CPU usage was being measured.");
-						return null;
-					}
-					totalTime += biProcs[i].TotalProcessorTime - startTimes[i];
-				}
-				double fraction = totalTime.TotalMilliseconds / sw.Elapsed.TotalMilliseconds;
-				record.BiCpuUsage = (byte)Math.Round((fraction / Environment.ProcessorCount) * 100);
-				record.CpuThreads = (short)Environment.ProcessorCount;
-
-				long physicalMemUsage = 0;
-				long virtualMemUsage = 0;
-				foreach (Process p in biProcs)
-				{
-					if (record.BiVersion == null)
-						record.BiVersion = p.MainModule.FileVersionInfo.FileVersion + " " + (MainSvc.Is64Bit(p) ? "x64" : "x86");
-					physicalMemUsage += p.WorkingSet64;
-					virtualMemUsage += p.VirtualMemorySize64;
-				}
-				record.BiMemUsageMB = (int)(physicalMemUsage / 1000000);
-				record.BiPeakVirtualMemUsageMB = (int)(virtualMemUsage / 1000000);
-
-				foreach (Process p in biProcs)
-				{
-					IntPtr handle = p.MainWindowHandle;
-					if (handle == IntPtr.Zero)
-					{
-						// This is the service.
-					}
-					else
-					{
-						// This is the console.
-						record.ConsoleOpen = true;
-						try
-						{
-							WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
-							if (GetWindowPlacement(handle, ref placement))
-							{
-								if (placement.showCmd == 2)
-								{
-									// Minimized
-									record.ConsoleWidth = -2;
-									record.ConsoleHeight = -2;
-								}
-								else
-								{
-									// Not Minimized
-									RECT Rect = new RECT();
-									if (GetWindowRect(handle, ref Rect))
-									{
-										record.ConsoleWidth = (short)NumberUtil.Clamp(Rect.right - Rect.left, 0, short.MaxValue);
-										record.ConsoleHeight = (short)NumberUtil.Clamp(Rect.bottom - Rect.top, 0, short.MaxValue);
-									}
-								}
-							}
-						}
-						catch (Exception ex)
-						{
-							Logger.Debug(ex);
-						}
-					}
-				}
-				if (biProcs.Count > 1 && !record.ConsoleOpen)
-					record.ConsoleOpen = true;
-			}
-
+			record.CpuUsage = c.activeStats.CpuUsage;
+			record.BiCpuUsage = c.activeStats.BiCpuUsage;
+			record.CpuThreads = (short)Environment.ProcessorCount;
+			record.BiVersion = c.activeStats.BiVersion;
+			record.BiMemUsageMB = c.activeStats.BiMemUsageMB;
+			record.BiPeakVirtualMemUsageMB = c.activeStats.BiPeakVirtualMemUsageMB;
+			record.ConsoleOpen = c.activeStats.ConsoleOpen;
+			record.ConsoleWidth = c.activeStats.ConsoleWidth;
+			record.ConsoleHeight = c.activeStats.ConsoleHeight;
 			record.Secret = Program.settings.secret;
-			record.OS = GetOsVersion();
-			CpuInfo cpuInfo = GetCpuInfo();
-			if (cpuInfo == null)
+			record.OS = c.OS;
+
+			if (c.cpu == null)
 			{
 				record.CpuModel = "Unknown";
-				record.CpuMHz = NumberUtil.ParseInt(cpuInfo.maxClockSpeed);
+				record.CpuMHz = 0;
 			}
 			else
 			{
-				record.CpuModel = cpuInfo.GetModel();
-				record.CpuMHz = NumberUtil.ParseInt(cpuInfo.maxClockSpeed);
+				record.CpuModel = c.cpu.GetModel();
+				record.CpuMHz = NumberUtil.ParseInt(c.cpu.maxClockSpeed);
 			}
+
 			record.HelperVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-			record.HwAccel = (byte)RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "hwaccel", 0);
-			record.ServiceMode = RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "Service", 0) == 1;
-			if (RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "limitlive", 0) == 0)
-				record.LivePreviewFPS = -2;
-			else
-				record.LivePreviewFPS = (short)RegistryUtil.GetHKLMValue<int>(@"SOFTWARE\Perspective Software\Blue Iris\Options", "livefps", -1);
+			record.HwAccel = (byte)c.global.HardwareAcceleration;
+			record.ServiceMode = c.global.ServiceMode;
+			record.LivePreviewFPS = (short)c.global.LivePreviewFPS;
 
-			ComputerInfo computerInfo = new ComputerInfo();
-			record.MemMB = (int)(computerInfo.TotalPhysicalMemory / 1000000);
-			record.MemFreeMB = (int)(computerInfo.AvailablePhysicalMemory / 1000000);
+			record.MemMB = c.activeStats.MemMB;
+			record.MemFreeMB = c.activeStats.MemFreeMB;
 
-			RamInfo ramInfo = GetRamInfo();
-			record.RamGiB = ramInfo.GiB;
-			record.RamChannels = ramInfo.Channels;
-			record.DimmLocations = ramInfo.DimmLocations;
-			record.RamMHz = ramInfo.MHz;
+			record.RamGiB = c.mem.GiB;
+			record.RamChannels = c.mem.Channels;
+			record.DimmLocations = c.mem.DimmLocations;
+			record.RamMHz = c.mem.MHz;
 
 			// Get camera info.
-			// Get frame rates (only accessible via BI's web server).
+			// Get frame rates, current profile (only accessible via BI's web server).
 			Dictionary<string, double> fpsMap = new Dictionary<string, double>();
 
+			int currentProfile = 1;
+			bool isAdmin = false;
+			bool gotCamlist = false;
+			bool gotStatus = false;
 			BiServerInfo.Reload();
+			//BiUserInfo.Reload();
 			if (BiServerInfo.enabled)
 			{
 				try
 				{
 					using (WebClient wc = new WebClient())
 					{
-						string session = CameraWebInterfaceLinker.GetSecureAuthenticatedSession(wc);
-						string response = wc.UploadString(CameraWebInterfaceLinker.GetJsonURL(), "{\"cmd\":\"camlist\",\"session\":\"" + session + "\"}");
-						wc.UploadString(CameraWebInterfaceLinker.GetJsonURL(), "{\"cmd\":\"logout\",\"session\":\"" + session + "\"}");
-						CamListResponse camListResponse = JsonConvert.DeserializeObject<CamListResponse>(response);
-						if (camListResponse != null && camListResponse.result == "success")
+						UserInfo user = BiUserInfo.CreateTemporaryUser();
+						string session = CameraWebInterfaceLinker.GetSecureAuthenticatedSession(wc, out isAdmin, user.name, user.GetDecodedPassword());
+						try
 						{
-							foreach (CameraListCamera camera in camListResponse.data)
+							try
 							{
-								if (camera.group == null)
-									fpsMap[camera.optionValue] = camera.FPS;
+								string response = wc.UploadString(CameraWebInterfaceLinker.GetJsonURL(), "{\"cmd\":\"camlist\",\"session\":\"" + session + "\"}");
+								CamListResponse camListResponse = JsonConvert.DeserializeObject<CamListResponse>(response);
+								if (camListResponse != null && camListResponse.result == "success")
+								{
+									foreach (CameraListCamera camera in camListResponse.data)
+									{
+										if (camera.group == null)
+											fpsMap[camera.optionValue] = camera.FPS;
+									}
+									gotCamlist = true;
+								}
 							}
+							catch (Exception ex)
+							{
+								Logger.Debug(ex, "Error reading camera list from web server.");
+							}
+
+							try
+							{
+								string response = wc.UploadString(CameraWebInterfaceLinker.GetJsonURL(), "{\"cmd\":\"status\",\"session\":\"" + session + "\"}");
+								StatusResponse statusResponse = JsonConvert.DeserializeObject<StatusResponse>(response);
+								if (statusResponse != null && statusResponse.result == "success")
+								{
+									currentProfile = statusResponse.data.profile;
+									gotStatus = true;
+									if (currentProfile < 1 || currentProfile > 7)
+									{
+										currentProfile = 1;
+										gotStatus = false;
+									}
+								}
+							}
+							catch (Exception ex)
+							{
+								Logger.Debug(ex, "Error reading camera list from web server.");
+							}
+						}
+						finally
+						{
+							wc.UploadString(CameraWebInterfaceLinker.GetJsonURL(), "{\"cmd\":\"logout\",\"session\":\"" + session + "\"}");
 						}
 					}
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex, "Error reading camera list from web server.");
+					Logger.Debug(ex, "Error dealing with web server.");
 				}
 			}
-
-			// Get camera info from registry
-			List<Upload_Camera> cameras = new List<Upload_Camera>();
-
-			RegistryKey camerasKey = RegistryUtil.GetHKLMKey(@"SOFTWARE\Perspective Software\Blue Iris\Cameras");
-			foreach (string camName in camerasKey.GetSubKeyNames())
+			record.webserverState = 0;
+			if (gotCamlist && gotStatus)
 			{
-				RegistryKey camKey = camerasKey.OpenSubKey(camName);
-				if (RegistryUtil.GetIntValue(camKey, "enabled", 0) != 1)
+				record.webserverState = 1;
+				if (isAdmin) // and any future admin-requiring stuff all worked
+					record.webserverState = 2;
+			}
+
+
+			// Get camera info
+			List<Upload_Camera> cameras = new List<Upload_Camera>();
+			foreach (Camera camSrc in c.cameras.Values)
+			{
+				if (!camSrc.enabled)
 					continue;
-				string shortName = RegistryUtil.GetStringValue(camKey, "shortname");
+
 				Upload_Camera cam = new Upload_Camera();
 
-				if (fpsMap.TryGetValue(shortName, out double fps))
-					cam.FPS = (byte)NumberUtil.Clamp(Math.Round(fps), 0, 255);
+				if (fpsMap.TryGetValue(camSrc.shortname, out double fps))
+					cam.FPS = (byte)Math.Round(fps).Clamp(0, 255);
 				else
-				{
-					int interval = RegistryUtil.GetIntValue(camKey, "interval", 1000000);
-					if (interval <= 0)
-						cam.FPS = 0;
-					else
-						cam.FPS = (byte)NumberUtil.Clamp(Math.Round(10000000.0 / interval), 0, 255);
-				}
-				cam.CapType = (byte)RegistryUtil.GetIntValue(camKey, "screencap", 0);
-				cam.Hwaccel = (byte)RegistryUtil.GetIntValue(camKey, "ip_hwaccel", 0);
-				cam.LimitDecode = RegistryUtil.GetIntValue(camKey, "smartdecode", 0) == 1;
-				cam.Pixels = RegistryUtil.GetIntValue(camKey, "fullxres", 0) * RegistryUtil.GetIntValue(camKey, "fullyres", 0);
-				cam.Type = (byte)RegistryUtil.GetIntValue(camKey, "type", 0);
-				RegistryKey motionKey = camKey.OpenSubKey("Motion");
-				cam.MotionDetector = RegistryUtil.GetIntValue(motionKey, "enabled", 0) == 1;
-				cam.RecordTriggerType = (byte)RegistryUtil.GetIntValue(motionKey, "continuous", 0);
-				RegistryKey clipsKey = camKey.OpenSubKey("Clips");
-				cam.RecordFormat = (byte)RegistryUtil.GetIntValue(clipsKey, "movieformat", 0);
-				cam.DirectToDisk = RegistryUtil.GetIntValue(clipsKey, "transcode", 0) == 0;
-				cam.VCodec = RegistryUtil.GetStringValue(clipsKey, "vcodec");
+					cam.FPS = (byte)(Math.Round(camSrc.MaxRate).Clamp(0, 255));
+				cam.CapType = (byte)camSrc.CapType;
+				cam.Hwaccel = (byte)camSrc.Hwva;
+				cam.LimitDecode = camSrc.LimitDecode;
+				cam.Pixels = camSrc.Pixels;
+				cam.Type = (byte)camSrc.Type;
+				cam.MotionDetector = camSrc.triggerSettings[currentProfile].motionDetectionEnabled;
+				cam.RecordTriggerType = (byte)camSrc.triggerSettings[currentProfile].triggerType;
+				cam.RecordFormat = (byte)camSrc.recordSettings[currentProfile].recordingFormat;
+				cam.DirectToDisk = camSrc.recordSettings[currentProfile].DirectToDisc;
+				cam.VCodec = camSrc.recordSettings[currentProfile].VCodec;
 				cameras.Add(cam);
 			}
 
 			record.cameras = cameras.ToArray();
-			record.gpus = GetGpuInfo().Select(g => new Upload_Gpu() { Name = g.Name, Version = g.DriverVersion }).ToArray();
+			record.gpus = c.gpus.Select(g => new Upload_Gpu() { Name = g.Name, Version = g.DriverVersion }).ToArray();
+
+			record.Total_FPS = record.Total_Megapixels = record.Total_MPPS = 0;
+			foreach (Upload_Camera cam in cameras)
+			{
+				float MP = cam.Pixels / 1000000f;
+				record.Total_Megapixels += MP;
+				record.Total_FPS += cam.FPS;
+				record.Total_MPPS += MP * cam.FPS;
+			}
 
 			return record;
 		}
@@ -367,206 +340,21 @@ namespace BiUpdateHelper
 			public string[] group;
 			public double FPS;
 		}
+		private class StatusResponse
+		{
+			public string result;
+			public StatusData data;
+		}
+		private class StatusData
+		{
+			public string result;
+			public int profile;
+		}
 #pragma warning restore 0649
 
 		private static string GetDebugInfo(Process process)
 		{
 			return process.TotalProcessorTime.ToString();
-		}
-
-		public static string GetOsVersion()
-		{
-			StringBuilder sb = new StringBuilder();
-			string prodName = RegistryUtil.GetHKLMValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ProductName", "Unknown");
-			sb.Append(prodName);
-
-			string release = RegistryUtil.GetHKLMValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "ReleaseId", "");
-			if (string.IsNullOrWhiteSpace(release))
-				sb.Append(" v" + RegistryUtil.GetHKLMValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentVersion", "Unknown"));
-			else
-			{
-				sb.Append(" v" + release);
-				string build = RegistryUtil.GetHKLMValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentBuildNumber", "");
-				if (string.IsNullOrWhiteSpace(build))
-					build = RegistryUtil.GetHKLMValue(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion", "CurrentBuildNumber", "");
-				if (!string.IsNullOrWhiteSpace(build))
-					sb.Append(" b" + build);
-			}
-			if (Environment.Is64BitOperatingSystem)
-				sb.Append(" (64 bit)");
-			else
-				sb.Append(" (32 bit)");
-			return sb.ToString();
-		}
-		public class CpuInfo
-		{
-			public string clockSpeed, maxClockSpeed, procName, manufacturer, version;
-			public CpuInfo(ManagementObject obj)
-			{
-				maxClockSpeed = DeNullify.ToString(obj["MaxClockSpeed"]);
-				clockSpeed = DeNullify.ToString(obj["CurrentClockSpeed"]);
-				procName = DeNullify.ToString(obj["Name"]);
-				manufacturer = DeNullify.ToString(obj["Manufacturer"]);
-				version = DeNullify.ToString(obj["Version"]);
-			}
-			public string GetModel()
-			{
-				if (!string.IsNullOrWhiteSpace(procName))
-					return procName;
-				else if (!string.IsNullOrWhiteSpace("version"))
-					return manufacturer + " " + version;
-				else
-					return manufacturer;
-			}
-			public override string ToString()
-			{
-				return GetModel() + " (" + maxClockSpeed + "MHz)";
-			}
-		}
-		public static CpuInfo GetCpuInfo()
-		{
-			// win32CompSys = new ManagementObjectSearcher("select * from Win32_ComputerSystem")
-			using (ManagementObjectSearcher win32Proc = new ManagementObjectSearcher("select * from Win32_Processor"))
-			{
-				foreach (ManagementObject obj in win32Proc.Get())
-				{
-					if (obj != null)
-					{
-						CpuInfo info = new CpuInfo(obj);
-						return info;
-					}
-				}
-			}
-			return null;
-		}
-		public class GpuInfo
-		{
-			public string Name;
-			public string DriverVersion;
-			public GpuInfo()
-			{
-			}
-			public GpuInfo(ManagementObject obj)
-			{
-				Name = DeNullify.ToString(obj["Name"]);
-				DriverVersion = DeNullify.ToString(obj["DriverVersion"]);
-			}
-		}
-		public static List<GpuInfo> GetGpuInfo()
-		{
-			using (ManagementObjectSearcher objSearcher = new ManagementObjectSearcher("select * from Win32_VideoController"))
-			{
-
-				List<GpuInfo> gpus = new List<GpuInfo>();
-				foreach (ManagementObject obj in objSearcher.Get())
-					if (obj != null)
-						gpus.Add(new GpuInfo(obj));
-				return gpus;
-			}
-		}
-		private class RamInfo_Internal
-		{
-			public long Capacity;
-			public string DeviceLocator;
-			public int Speed;
-			public RamInfo_Internal() { }
-			public RamInfo_Internal(ManagementObject obj)
-			{
-				Capacity = NumberUtil.ParseLong(DeNullify.ToString(obj["Capacity"]));
-				DeviceLocator = DeNullify.ToString(obj["DeviceLocator"]);
-				Speed = NumberUtil.ParseInt(DeNullify.ToString(obj["Speed"]));
-				//sb.AppendLine("Bank Label: " + obj["BankLabel"]);
-				//sb.AppendLine("Capacity: " + obj["Capacity"]);
-				//sb.AppendLine("Data Width: " + obj["DataWidth"]);
-				//sb.AppendLine("Description: " + obj["Description"]);
-				//sb.AppendLine("Device Locator: " + obj["DeviceLocator"]);
-				//sb.AppendLine("Form Factor: " + obj["FormFactor"]);
-				//sb.AppendLine("Hot Swappable: " + obj["HotSwappable"]);
-				//sb.AppendLine("Manufacturer: " + obj["Manufacturer"]);
-				//sb.AppendLine("Memory Type: " + obj["MemoryType"]);
-				//sb.AppendLine("Name: " + obj["Name"]);
-				//sb.AppendLine("Part Number: " + obj["PartNumber"]);
-				//sb.AppendLine("Position In Row: " + obj["PositionInRow"]);
-				//sb.AppendLine("Speed: " + obj["Speed"]);
-				//sb.AppendLine("Tag: " + obj["Tag"]);
-				//sb.AppendLine("Type Detail: " + obj["TypeDetail"]);
-			}
-		}
-		public class RamInfo
-		{
-			public float GiB;
-			public ushort Channels;
-			public ushort MHz;
-			public string DimmLocations;
-			public RamInfo() { }
-			public RamInfo(float GiB, ushort Channels, ushort MHz, string DimmLocations)
-			{
-				this.GiB = GiB;
-				this.Channels = Channels;
-				this.MHz = MHz;
-				this.DimmLocations = DimmLocations;
-			}
-		}
-		private static Regex rxGetChannel = new Regex("Channel(.+)-", RegexOptions.Compiled);
-		public static RamInfo GetRamInfo()
-		{
-			List<RamInfo_Internal> dimms = new List<RamInfo_Internal>();
-			using (ManagementObjectSearcher win32Memory = new ManagementObjectSearcher("select * from Win32_PhysicalMemory"))
-			{
-				foreach (ManagementObject obj in win32Memory.Get())
-					if (obj != null)
-						dimms.Add(new RamInfo_Internal(obj));
-			}
-			HashSet<string> channels = new HashSet<string>();
-			long capacity = 0;
-			int speed = 0;
-			List<string> DimmLocations = new List<string>();
-			foreach (RamInfo_Internal dimm in dimms)
-			{
-				DimmLocations.Add(dimm.DeviceLocator);
-				Match m = rxGetChannel.Match(dimm.DeviceLocator);
-				if (m.Success)
-					channels.Add(m.Groups[1].Value);
-				capacity += dimm.Capacity;
-				if (speed == 0)
-					speed = dimm.Speed;
-			}
-			return new RamInfo((float)NumberUtil.BytesToGiB(capacity), (ushort)channels.Count, (ushort)speed, string.Join(";", DimmLocations));
-		}
-		private static class DeNullify
-		{
-			public static string ToString(object obj)
-			{
-				if (obj == null)
-					return "";
-				else
-					return obj.ToString();
-			}
-		}
-		[DllImport("user32.dll", SetLastError = true)]
-		static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct RECT
-		{
-			public int left;
-			public int top;
-			public int right;
-			public int bottom;
-		}
-
-		[DllImport("user32.dll")]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
-
-		private struct WINDOWPLACEMENT
-		{
-			public int length;
-			public int flags;
-			public int showCmd;
-			public System.Drawing.Point ptMinPosition;
-			public System.Drawing.Point ptMaxPosition;
-			public System.Drawing.Rectangle rcNormalPosition;
 		}
 	}
 }

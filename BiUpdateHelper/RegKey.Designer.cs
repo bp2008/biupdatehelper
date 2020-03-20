@@ -178,9 +178,9 @@
 			this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.label9.Location = new System.Drawing.Point(107, 145);
 			this.label9.Name = "label9";
-			this.label9.Size = new System.Drawing.Size(76, 16);
+			this.label9.Size = new System.Drawing.Size(89, 16);
 			this.label9.TabIndex = 19;
-			this.label9.Text = "Blue Iris 4";
+			this.label9.Text = "Blue Iris 4/5";
 			// 
 			// RegKey
 			// 

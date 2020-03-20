@@ -34,12 +34,12 @@ table
 td, th
 {
 	border-bottom: 1px solid #b5b5b5;
-    padding: 2px 12px;
+	padding: 2px 12px;
 }
 img
 {
 	max-width: 120px;
-    max-height: 120px;
+	max-height: 120px;
 	cursor: pointer;
 }
 		</style>");
@@ -68,39 +68,47 @@ img
 						MessageBox.Show("This function is not supported on your system.  Possible reasons are that your Blue Iris version is incompatible, or your Blue Iris web server is not enabled.");
 						return;
 					}
-					BiUserInfo.Reload();
-					CookieAwareWebClient wc = new CookieAwareWebClient();
-					wc.Proxy = null;
-					if (BiServerInfo.authenticate == AuthenticationMode.All_connections)
+					//BiUserInfo.Reload();
+					AdvWebClient wc = new AdvWebClient();
+					string session = null;
+					try
 					{
+						wc.Proxy = null;
 						try
 						{
-							wc.CookieContainer.Add(new Cookie("session", GetSecureAuthenticatedSession(wc), "/", BiServerInfo.lanIp));
+							UserInfo user = BiUserInfo.CreateTemporaryUser();
+							session = GetSecureAuthenticatedSession(wc, out bool isAdmin, user.name, user.GetDecodedPassword());
+							wc.CookieContainer.Add(new Cookie("session", session, "/", BiServerInfo.lanIp));
 						}
 						catch (Exception ex)
 						{
 							Logger.Debug(ex);
 							wc = null;
 						}
-					}
 
-					List<CameraInfo> camList = new List<CameraInfo>(cameraNames.Length);
-					foreach (string cameraName in cameraNames)
-					{
-						RegistryKey cam = cameras.OpenSubKey(cameraName);
-						string shortName = cam.GetValue("shortname").ToString();
-						string ip = cam.GetValue("ip").ToString();
-						if (string.IsNullOrWhiteSpace(ip))
-							continue;
-						string port = cam.GetValue("ip_port").ToString();
-						bool https = cam.GetValue("https").ToString() != "0";
-						int index = int.Parse(cam.GetValue("pos").ToString());
-						CameraInfo ci = new CameraInfo(cameraName, shortName, ip, port, https, index);
-						camList.Add(ci);
+						List<CameraInfo> camList = new List<CameraInfo>(cameraNames.Length);
+						foreach (string cameraName in cameraNames)
+						{
+							RegistryKey cam = cameras.OpenSubKey(cameraName);
+							string shortName = cam.GetValue("shortname").ToString();
+							string ip = cam.GetValue("ip").ToString();
+							if (string.IsNullOrWhiteSpace(ip))
+								continue;
+							string port = cam.GetValue("ip_port").ToString();
+							bool https = cam.GetValue("https").ToString() != "0";
+							int index = int.Parse(cam.GetValue("pos").ToString());
+							CameraInfo ci = new CameraInfo(cameraName, shortName, ip, port, https, index);
+							camList.Add(ci);
+						}
+						camList.Sort(new Comparison<CameraInfo>((c1, c2) => c1.index.CompareTo(c2.index)));
+						foreach (CameraInfo ci in camList)
+							AddCameraLink(sb, ci, wc);
 					}
-					camList.Sort(new Comparison<CameraInfo>((c1, c2) => c1.index.CompareTo(c2.index)));
-					foreach (CameraInfo ci in camList)
-						AddCameraLink(sb, ci, wc);
+					finally
+					{
+						wc?.UploadString(CameraWebInterfaceLinker.GetJsonURL(), "{\"cmd\":\"logout\",\"session\":\"" + session + "\"}");
+						wc?.Dispose();
+					}
 				}
 			}
 			sb.AppendLine("</tbody></table></body>");
@@ -112,7 +120,7 @@ img
 		{
 			return "http://" + BiServerInfo.lanIp + ":" + BiServerInfo.port + "/json";
 		}
-		public static string GetSecureAuthenticatedSession(WebClient wc)
+		public static string GetSecureAuthenticatedSession(WebClient wc, out bool isAdmin, string user, string pass)
 		{
 			string url = GetJsonURL();
 			string response = wc.UploadString(url, "{\"cmd\":\"login\"}");
@@ -120,10 +128,13 @@ img
 			if (!m.Success)
 				throw new Exception("Unexpected response from login command: " + response);
 			string session = m.Groups[1].Value;
-			string challengeResponse = Hash.GetMD5Hex(BiUserInfo.preferredUser?.name + ":" + session + ":" + BiUserInfo.preferredUser?.GetDecodedPassword());
+			string challengeResponse = Hash.GetMD5Hex(user + ":" + session + ":" + pass);
 			response = wc.UploadString(url, "{\"cmd\":\"login\",\"response\":\"" + challengeResponse + "\",\"session\":\"" + session + "\"}");
 			if (Regex.IsMatch(response, "\"result\": ?\"success\""))
+			{
+				isAdmin = Regex.IsMatch(response, "\"admin\": ?true");
 				return session;
+			}
 			else
 				throw new Exception("Unable to log in to server");
 		}

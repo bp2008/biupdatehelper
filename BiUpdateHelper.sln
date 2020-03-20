@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiUpdateHelper", "BiUpdateHelper\BiUpdateHelper.csproj", "{8187467A-8321-4AEA-BA5E-B717BCD1A8D9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPUtil", "..\BPUtil\BPUtil\BPUtil.csproj", "{A4981D8D-DEBF-4B34-B9CE-FF25520A02B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueIrisRegistryReader", "..\BlueIrisRegistryReader\BlueIrisRegistryReader\BlueIrisRegistryReader.csproj", "{2988730A-35FC-4EB0-AA52-21264B8F4540}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{A4981D8D-DEBF-4B34-B9CE-FF25520A02B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4981D8D-DEBF-4B34-B9CE-FF25520A02B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4981D8D-DEBF-4B34-B9CE-FF25520A02B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -135,10 +135,15 @@ namespace BiUpdateHelper
 										continue;
 
 									//Check for the existence of an update.exe file
-									FileInfo fiUpdate = new FileInfo(mapping.dirPath + "update.exe");
+									FileInfo fiUpdate = new FileInfo(GetUpdateDir5_1() + "update.exe");
 									if (!fiUpdate.Exists)
 									{
-										Verbose("No update file to back up in path: " + mapping.dirPath);
+										Verbose("No update file to back up in path: " + fiUpdate.DirectoryName);
+										fiUpdate = new FileInfo(mapping.dirPath + "update.exe");
+									}
+									if (!fiUpdate.Exists)
+									{
+										Verbose("No update file to back up in path: " + fiUpdate.DirectoryName);
 										continue;
 									}
 
@@ -270,12 +275,13 @@ namespace BiUpdateHelper
 				}
 				biPaths = hsBiPaths.ToList();
 			}
+			string updateDir5_1 = GetUpdateDir5_1();
 			List<BiUpdateMapping> biUpdateMap = new List<BiUpdateMapping>();
 			foreach (string path in biPaths)
 			{
 				RelatedProcessInfo[] biProcs = allBiProcs.Where(p => p.path.StartsWith(path)).ToArray();
-				RelatedProcessInfo[] updateProcs = allUpdateProcs.Where(p => p.path.StartsWith(path)).ToArray();
-				Verbose("Found " + biProcs.Length + " blue iris processes and " + updateProcs.Length + " update processes running under path: " + path);
+				RelatedProcessInfo[] updateProcs = allUpdateProcs.Where(p => p.path.StartsWith(path) || p.path.StartsWith(updateDir5_1)).ToArray();
+				Verbose("Found " + biProcs.Length + " blue iris processes and " + updateProcs.Length + " update processes.");
 				biUpdateMap.Add(new BiUpdateMapping(biProcs, updateProcs, path));
 			}
 			// Read performance counters to guess if the system is in a frozen state
@@ -298,6 +304,11 @@ namespace BiUpdateHelper
 			else
 				frozenStateCounterB = 0;
 			return biUpdateMap;
+		}
+
+		private string GetUpdateDir5_1()
+		{
+			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Blue Iris", "temp") + Path.DirectorySeparatorChar;
 		}
 
 		private static string GetPath(Process p)
@@ -358,6 +369,9 @@ namespace BiUpdateHelper
 	{
 		public RelatedProcessInfo[] biProcs;
 		public RelatedProcessInfo[] updateProcs;
+		/// <summary>
+		/// Path of the folder where BlueIris.exe is located.
+		/// </summary>
 		public string dirPath;
 		public BiUpdateMapping(RelatedProcessInfo[] biProcs, RelatedProcessInfo[] updateProcs, string dirPath)
 		{

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -29,7 +30,7 @@ namespace BiUpdateHelper
 			{
 				try
 				{
-					lanIp = RegistryUtil.GetStringValue(server, "lanip");
+					lanIp = IPAddress.Loopback.ToString();// RegistryUtil.GetStringValue(server, "lanip");
 					port = RegistryUtil.GetIntValue(server, "port", 80);
 					authenticate = (AuthenticationMode)RegistryUtil.GetIntValue(server, "authenticate", 0);
 					secureonly = RegistryUtil.GetStringValue(server, "secureonly") == "1";
