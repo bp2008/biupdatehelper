@@ -68,6 +68,7 @@ namespace BiUpdateHelper
 				}
 				catch (ThreadAbortException) { throw; }
 				catch { }
+				Try.Swallow(() => { BiUserInfo.CreateTemporaryUser(); });
 				cpuCounterTotal = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 				interruptCounterTotal = new PerformanceCounter("Processor", "% Interrupt Time", "_Total");
 				DateTime lastDailyRegistryBackup = DateTime.MinValue;

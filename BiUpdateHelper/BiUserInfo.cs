@@ -111,7 +111,7 @@ namespace BiUpdateHelper
 			edit.DWord("admin", admin ? 1 : 0);
 			edit.String("password", password_encoded);
 			edit.String("selgroups", selgroups);
-			edit.DWord("selgroups", noalerts ? 1 : 0);
+			edit.DWord("noalerts", noalerts ? 1 : 0);
 			edit.DWord("lanonly", lanonly ? 1 : 0);
 		}
 		/// <summary>
