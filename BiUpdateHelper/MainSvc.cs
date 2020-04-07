@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BPUtil;
+using Microsoft.Win32;
 
 namespace BiUpdateHelper
 {
@@ -309,7 +310,13 @@ namespace BiUpdateHelper
 
 		private string GetUpdateDir5_1()
 		{
-			return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Blue Iris", "temp") + Path.DirectorySeparatorChar;
+			string tempPath = null;
+			RegistryKey options = RegistryUtil.HKLM.OpenSubKey("SOFTWARE\\Perspective Software\\Blue Iris\\Options");
+			if (options != null)
+				tempPath = RegistryUtil.GetStringValue(options, "temppath");
+			if (string.IsNullOrWhiteSpace(tempPath))
+				tempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Blue Iris", "temp");
+			return tempPath.TrimEnd('/','\\') + Path.DirectorySeparatorChar;
 		}
 
 		private static string GetPath(Process p)
