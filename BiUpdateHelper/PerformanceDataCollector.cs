@@ -64,6 +64,7 @@ namespace BiUpdateHelper
 	public class Upload_Camera
 	{
 		public int Pixels;
+		public int MainPixels; // New in 1.9.0.0. If nonzero, the camera is believed to have a sub stream configured.
 		public byte FPS;
 		public bool FPSConfirmed; // New in 1.7.1.0. True if the FPS came from the web server and is therefore reliable.
 		public bool LimitDecode;
@@ -313,9 +314,11 @@ namespace BiUpdateHelper
 				cam.Hwaccel = (byte)camSrc.Hwva;
 				cam.LimitDecode = camSrc.LimitDecode;
 				cam.Pixels = camSrc.Pixels;
+				if (camSrc.hasSubStream)
+					cam.MainPixels = camSrc.MainPixels;
 				cam.Type = (byte)camSrc.Type;
 				cam.MotionDetector = camSrc.triggerSettings[currentProfile].motionDetectionEnabled;
-				cam.RecordTriggerType = (byte)camSrc.triggerSettings[currentProfile].triggerType;
+				cam.RecordTriggerType = (byte)camSrc.recordSettings[currentProfile].triggerType;
 				cam.RecordFormat = (byte)camSrc.recordSettings[currentProfile].recordingFormat;
 				cam.DirectToDisk = camSrc.recordSettings[currentProfile].DirectToDisc;
 				cam.VCodec = camSrc.recordSettings[currentProfile].VCodec;
