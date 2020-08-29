@@ -22,6 +22,8 @@ namespace BiUpdateHelper
 			me.admin = true;
 			me.noalerts = true;
 			me.lanonly = false;
+			me.enabled = true;
+			me.usegroups = false;
 			me.Commit();
 			return me;
 		}
@@ -74,9 +76,26 @@ namespace BiUpdateHelper
 		/// Password, encoded as Base64.
 		/// </summary>
 		public string password_encoded;
+		/// <summary>
+		/// List of allowed groups, separted by semicolons and with the list also wrapped in semicolons. e.g. ";group1;" or ";group1;group2;"
+		/// </summary>
 		public string selgroups;
+		/// <summary>
+		/// If true, this user is exempt from remote access status alerts.
+		/// </summary>
 		public bool noalerts;
+		/// <summary>
+		/// If true, user can only log in while on the same LAN as Blue Iris.
+		/// </summary>
 		public bool lanonly;
+		/// <summary>
+		/// If true, user is enabled and usable.
+		/// </summary>
+		public bool enabled = true;
+		/// <summary>
+		/// If true, user is limited to a list of groups.
+		/// </summary>
+		public bool usegroups = false;
 
 		public UserInfo(string name, string password_raw)
 		{
@@ -91,6 +110,8 @@ namespace BiUpdateHelper
 			selgroups = RegistryUtil.GetStringValue(key, "selgroups");
 			noalerts = RegistryUtil.GetStringValue(key, "noalerts") == "1";
 			lanonly = RegistryUtil.GetStringValue(key, "lanonly") == "1";
+			enabled = RegistryUtil.GetStringValue(key, "enabled") == "1";
+			usegroups = RegistryUtil.GetStringValue(key, "usegroups") == "1";
 		}
 		public string GetDecodedPassword()
 		{
@@ -113,6 +134,8 @@ namespace BiUpdateHelper
 			edit.String("selgroups", selgroups);
 			edit.DWord("noalerts", noalerts ? 1 : 0);
 			edit.DWord("lanonly", lanonly ? 1 : 0);
+			edit.DWord("enabled", enabled ? 1 : 0);
+			edit.DWord("usegroups", usegroups ? 1 : 0);
 		}
 		/// <summary>
 		/// <para>Deletes the user with this name from the registry.</para>

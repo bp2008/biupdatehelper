@@ -136,7 +136,7 @@ img
 				return session;
 			}
 			else
-				throw new Exception("Unable to log in to server");
+				throw new Exception("Unable to log in to server. Login response was: " + response);
 		}
 
 		private static void AddCameraLink(StringBuilder sb, CameraInfo ci, WebClient wc)
