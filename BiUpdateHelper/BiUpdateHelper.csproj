@@ -42,11 +42,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Costura, Version=1.6.2.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
-      <HintPath>..\packages\Costura.Fody.1.6.2\lib\dotnet\Costura.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -64,9 +59,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BiServerInfo.cs" />
-    <Compile Include="BiUserInfo.cs" />
-    <Compile Include="CameraWebInterfaceLinker.cs" />
     <Compile Include="MainSvc.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -75,7 +67,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RegistryBackup.cs" />
     <Compile Include="RegKey.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -89,12 +80,11 @@
       <DependentUpon>ServiceSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="PerformanceDataCollector.cs" />
-    <Compile Include="PerformanceData.cs">
+    <Compile Include="PerformanceDataForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="PerformanceData.Designer.cs">
-      <DependentUpon>PerformanceData.cs</DependentUpon>
+    <Compile Include="PerformanceDataForm.Designer.cs">
+      <DependentUpon>PerformanceDataForm.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -109,8 +99,8 @@
     <EmbeddedResource Include="ServiceSettings.resx">
       <DependentUpon>ServiceSettings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="PerformanceData.resx">
-      <DependentUpon>PerformanceData.cs</DependentUpon>
+    <EmbeddedResource Include="PerformanceDataForm.resx">
+      <DependentUpon>PerformanceDataForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -126,25 +116,20 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\BlueIrisRegistryReader\BlueIrisRegistryReader\BlueIrisRegistryReader.csproj">
-      <Project>{2988730a-35fc-4eb0-aa52-21264b8f4540}</Project>
+      <Project>{2988730A-35FC-4EB0-AA52-21264B8F4540}</Project>
       <Name>BlueIrisRegistryReader</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\BPUtil\BPUtil\BPUtil.csproj">
       <Project>{a4981d8d-debf-4b34-b9ce-ff25520a02b7}</Project>
       <Name>BPUtil</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PerformanceData\PerformanceData.csproj">
+      <Project>{96b932bb-0bb4-434a-b6f8-258c871e7338}</Project>
+      <Name>PerformanceData</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(SolutionDir)LICENSE" "$(TargetDir)LICENSE"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="..\packages\Fody.2.0.0\build\dotnet\Fody.targets" Condition="Exists('..\packages\Fody.2.0.0\build\dotnet\Fody.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Fody.2.0.0\build\dotnet\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.2.0.0\build\dotnet\Fody.targets'))" />
-    <Error Condition="!Exists('..\packages\Costura.Fody.1.6.2\build\dotnet\Costura.Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.1.6.2\build\dotnet\Costura.Fody.targets'))" />
-  </Target>
-  <Import Project="..\packages\Costura.Fody.1.6.2\build\dotnet\Costura.Fody.targets" Condition="Exists('..\packages\Costura.Fody.1.6.2\build\dotnet\Costura.Fody.targets')" />
 </Project>

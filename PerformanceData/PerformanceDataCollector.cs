@@ -16,7 +16,7 @@ using Microsoft.VisualBasic.Devices;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 
-namespace BiUpdateHelper
+namespace BiUpdateHelper.PerformanceData
 {
 	public class Upload_Record
 	{
@@ -43,17 +43,17 @@ namespace BiUpdateHelper
 		public short ConsoleWidth = -1; // New in v2
 		public short ConsoleHeight = -1; // New in v2
 		public short LivePreviewFPS = -1; // New in v2
-										  /// <summary>
-										  /// Total number of pixels, in millions, of all cameras together.
-										  /// </summary>
+		/// <summary>
+		/// Total number of pixels, in millions, of all cameras together.
+		/// </summary>
 		public float Total_Megapixels; // New in 1.6.4.3, ignored by server
-									   /// <summary>
-									   /// Total number of frames per second being input into the system.
-									   /// </summary>
+		/// <summary>
+		/// Total number of frames per second being input into the system.
+		/// </summary>
 		public float Total_FPS; // New in 1.6.4.3, ignored by server
-								/// <summary>
-								/// Megapixels per second being input into the system.
-								/// </summary>
+		/// <summary>
+		/// Megapixels per second being input into the system.
+		/// </summary>
 		public float Total_MPPS; // New in 1.6.4.3, ignored by server
 		public byte webserverState = 0; // New in 1.7.0.0. Can be used to better determine which fields are accurate.  0: Failed to get things from web server. 1: Got all non-admin things. 2: Got all admin-requiring things.
 		public bool ProfileConfirmed; // New in 1.7.1.0. Indicates that the profile number came from the web server so related settings can be considered reliable.
@@ -89,11 +89,20 @@ namespace BiUpdateHelper
 		private static bool uploadNextReport;
 		private static bool saveLocalNextReport;
 		/// <summary>
+		/// REQUIRED callback that returns the secret string for this machine's performance data uploads.
+		/// </summary>
+		public static Func<string> getSecretString;
+		/// <summary>
+		/// REQUIRED callback that is called when a report is uploaded.
+		/// </summary>
+		public static Action onReportUploaded;
+		/// <summary>
 		/// If it is time to submit an anonymous Blue Iris usage report, do it in a background thread.
 		/// </summary>
-		public static void HandlePossiblePerfDataReport()
+		/// <param name="lastUsageReportAt">Epoch time (milliseconds) of the last usage report.</param>
+		public static void HandlePossiblePerfDataReport(long lastUsageReportAt)
 		{
-			DateTime lastReportAt = TimeUtil.DateTimeFromEpochMS(Program.settings.lastUsageReportAt);
+			DateTime lastReportAt = TimeUtil.DateTimeFromEpochMS(lastUsageReportAt);
 			DateTime now = DateTime.UtcNow;
 			if (now < lastReportAt)
 				lastReportAt = DateTime.MinValue;
@@ -152,9 +161,7 @@ namespace BiUpdateHelper
 				}
 
 				// Save the time so this doesn't happen again for a while.
-				Program.settings.Load();
-				Program.settings.lastUsageReportAt = TimeUtil.GetTimeInMsSinceEpoch();
-				Program.settings.Save();
+				onReportUploaded();
 			}
 			catch (ThreadAbortException) { }
 			catch (Exception ex)
@@ -170,7 +177,7 @@ namespace BiUpdateHelper
 		/// Creates an anonymous usage record.  This method spends 10 seconds measuring CPU usage.  Returns null if any BlueIris.exe processes close while CPU usage is being measured, or if no BlueIris.exe processes were open.
 		/// </summary>
 		/// <returns></returns>
-		public static Upload_Record GetPerfDataRecord()
+		private static Upload_Record GetPerfDataRecord()
 		{
 			Upload_Record record = new Upload_Record();
 
@@ -186,7 +193,7 @@ namespace BiUpdateHelper
 			record.ConsoleOpen = c.activeStats.ConsoleOpen;
 			record.ConsoleWidth = c.activeStats.ConsoleWidth;
 			record.ConsoleHeight = c.activeStats.ConsoleHeight;
-			record.Secret = Program.settings.secret;
+			record.Secret = getSecretString();
 			record.OS = c.OS;
 
 			if (c.cpu == null)

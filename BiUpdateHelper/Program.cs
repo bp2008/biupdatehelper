@@ -6,6 +6,7 @@ using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using BlueIrisRegistryReader;
 using BPUtil;
 using BPUtil.Forms;
 
@@ -38,6 +39,17 @@ namespace BiUpdateHelper
 			RegistryUtil.Force32BitRegistryAccess = settings.bi32OnWin64;
 
 			AutoFixBad32BitSetting();
+
+			PerformanceData.PerformanceDataCollector.onReportUploaded = () =>
+			{
+				settings.Load();
+				settings.lastUsageReportAt = TimeUtil.GetTimeInMsSinceEpoch();
+				settings.Save();
+			};
+			PerformanceData.PerformanceDataCollector.getSecretString = () =>
+			{
+				return Program.settings.secret;
+			};
 
 			if (Environment.UserInteractive)
 			{
@@ -105,12 +117,13 @@ namespace BiUpdateHelper
 
 		private static void btnRegistryBackupNow_Click(object sender, EventArgs e)
 		{
-			RegistryBackup.BackupNow(BiUpdateHelperSettings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg");
+			RegistryBackup.BackupNow(BiUpdateHelperSettings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg",
+									Program.settings.bi32OnWin64);
 		}
 
 		private static void btnPerfData_Click(object sender, EventArgs e)
 		{
-			PerformanceData pd = new PerformanceData();
+			PerformanceDataForm pd = new PerformanceDataForm();
 			pd.ShowDialog();
 		}
 	}

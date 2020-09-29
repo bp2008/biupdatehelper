@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BPUtil", "..\BPUtil\BPUtil\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueIrisRegistryReader", "..\BlueIrisRegistryReader\BlueIrisRegistryReader\BlueIrisRegistryReader.csproj", "{2988730A-35FC-4EB0-AA52-21264B8F4540}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceData", "PerformanceData\PerformanceData.csproj", "{96B932BB-0BB4-434A-B6F8-258C871E7338}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2988730A-35FC-4EB0-AA52-21264B8F4540}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96B932BB-0BB4-434A-B6F8-258C871E7338}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96B932BB-0BB4-434A-B6F8-258C871E7338}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96B932BB-0BB4-434A-B6F8-258C871E7338}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96B932BB-0BB4-434A-B6F8-258C871E7338}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BiUpdateHelper.PerformanceData;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,9 +12,9 @@ using System.Windows.Forms;
 
 namespace BiUpdateHelper
 {
-	public partial class PerformanceData : Form
+	public partial class PerformanceDataForm : Form
 	{
-		public PerformanceData()
+		public PerformanceDataForm()
 		{
 			InitializeComponent();
 		}

@@ -10,6 +10,8 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using BiUpdateHelper.PerformanceData;
+using BlueIrisRegistryReader;
 using BPUtil;
 using Microsoft.Win32;
 
@@ -79,13 +81,14 @@ namespace BiUpdateHelper
 					Verbose("Starting Iteration");
 					try
 					{
-						PerformanceDataCollector.HandlePossiblePerfDataReport();
+						PerformanceDataCollector.HandlePossiblePerfDataReport(Program.settings.lastUsageReportAt);
 						DateTime now = DateTime.Now;
 						if (lastDailyRegistryBackup.Year != now.Year || lastDailyRegistryBackup.Month != now.Month || lastDailyRegistryBackup.Day != now.Day)
 						{
 							lastDailyRegistryBackup = now;
 							if (Program.settings.dailyRegistryBackups)
-								RegistryBackup.BackupNow(BiUpdateHelperSettings.GetDailyRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd") + ".reg");
+								RegistryBackup.BackupNow(BiUpdateHelperSettings.GetDailyRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd") + ".reg",
+									Program.settings.bi32OnWin64);
 						}
 						// Build a list of unique directories that have an active blueiris.exe.
 						// There is not likely to be more than one directory, though a single directory 
@@ -228,7 +231,8 @@ namespace BiUpdateHelper
 		private void TryBackupRegistryForBiVersion(BiVersionInfo versionInfo)
 		{
 			if (versionInfo != null && Program.settings.includeRegistryWithUpdateBackup)
-				RegistryBackup.BackupNow(BiUpdateHelperSettings.GetBeforeUpdatesRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + versionInfo.cpu_32_64 + "-" + versionInfo.version + ".reg");
+				RegistryBackup.BackupNow(BiUpdateHelperSettings.GetBeforeUpdatesRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + versionInfo.cpu_32_64 + "-" + versionInfo.version + ".reg",
+									Program.settings.bi32OnWin64);
 		}
 
 		private List<BiUpdateMapping> GetUpdateInfo()
@@ -316,7 +320,7 @@ namespace BiUpdateHelper
 				tempPath = RegistryUtil.GetStringValue(options, "temppath");
 			if (string.IsNullOrWhiteSpace(tempPath))
 				tempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Blue Iris", "temp");
-			return tempPath.TrimEnd('/','\\') + Path.DirectorySeparatorChar;
+			return tempPath.TrimEnd('/', '\\') + Path.DirectorySeparatorChar;
 		}
 
 		private static string GetPath(Process p)
