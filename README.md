@@ -89,3 +89,7 @@ After using this program, you may notice a new user in your user list named `biu
 ## Discuss on IpCamTalk
 
 https://ipcamtalk.com/threads/blue-iris-update-helper-biupdatehelper.18667
+
+## Building from Source
+
+To build this project, you will also need https://github.com/bp2008/BlueIrisRegistryReader and https://github.com/bp2008/BPUtil.  Build in Visual Studio 2019 Community Edition.
