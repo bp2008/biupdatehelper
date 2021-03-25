@@ -1,4 +1,5 @@
 ﻿using BPUtil;
+using BlueIrisRegistryReader;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,6 +34,7 @@ namespace BiUpdateHelper
 			cb_dailyRegistryBackups.Checked = settings.dailyRegistryBackups;
 			cb_logVerbose.Checked = settings.logVerbose;
 			cb_BI32Win64.Checked = settings.bi32OnWin64;
+			txtRegistryBackupsPath.Text = settings.registryBackupsFolderPath;
 			isLoaded = true;
 		}
 
@@ -51,21 +53,36 @@ namespace BiUpdateHelper
 				settings.dailyRegistryBackups = cb_dailyRegistryBackups.Checked;
 				settings.logVerbose = cb_logVerbose.Checked;
 				settings.bi32OnWin64 = cb_BI32Win64.Checked;
+				settings.registryBackupsFolderPath = txtRegistryBackupsPath.Text;
 				RegistryUtil.Force32BitRegistryAccess = settings.bi32OnWin64;
 
 				settings.Save();
 			}
 		}
 
+		private void txtRegistryBackupsPath_TextChanged(object sender, EventArgs e)
+		{
+			SaveSettings();
+		}
+
 
 		private void btnViewRegistryBackups_Click(object sender, EventArgs e)
 		{
-			Process.Start(BiUpdateHelperSettings.GetRegistryBackupLocation());
+			Process.Start(Program.settings.GetRegistryBackupLocation());
 		}
 
 		private void btnLaunch32BitRegedit_Click(object sender, EventArgs e)
 		{
 			Process.Start(RegistryBackup.GetRegeditPath(true));
+		}
+
+		private void btnRegistryBackupsBrowse_Click(object sender, EventArgs e)
+		{
+			if (!string.IsNullOrEmpty(txtRegistryBackupsPath.Text))
+				folderBrowserRegistryBackups.SelectedPath = txtRegistryBackupsPath.Text;
+			DialogResult dr = folderBrowserRegistryBackups.ShowDialog();
+			if (dr == DialogResult.OK)
+				txtRegistryBackupsPath.Text = folderBrowserRegistryBackups.SelectedPath;
 		}
 	}
 }

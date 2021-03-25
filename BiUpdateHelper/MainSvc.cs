@@ -87,7 +87,7 @@ namespace BiUpdateHelper
 						{
 							lastDailyRegistryBackup = now;
 							if (Program.settings.dailyRegistryBackups)
-								RegistryBackup.BackupNow(BiUpdateHelperSettings.GetDailyRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd") + ".reg",
+								RegistryBackup.BackupNow(Program.settings.GetDailyRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd") + ".reg",
 									Program.settings.bi32OnWin64);
 						}
 						// Build a list of unique directories that have an active blueiris.exe.
@@ -231,7 +231,7 @@ namespace BiUpdateHelper
 		private void TryBackupRegistryForBiVersion(BiVersionInfo versionInfo)
 		{
 			if (versionInfo != null && Program.settings.includeRegistryWithUpdateBackup)
-				RegistryBackup.BackupNow(BiUpdateHelperSettings.GetBeforeUpdatesRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + versionInfo.cpu_32_64 + "-" + versionInfo.version + ".reg",
+				RegistryBackup.BackupNow(Program.settings.GetBeforeUpdatesRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + versionInfo.cpu_32_64 + "-" + versionInfo.version + ".reg",
 									Program.settings.bi32OnWin64);
 		}
 

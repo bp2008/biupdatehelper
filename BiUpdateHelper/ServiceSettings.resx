@@ -170,4 +170,7 @@ download a new update.
 
 Registry backups are stored alongside BiUpdateHelper.</value>
   </data>
+  <metadata name="folderBrowserRegistryBackups.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>114, 17</value>
+  </metadata>
 </root>

@@ -18,6 +18,7 @@ namespace BiUpdateHelper
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
+		[STAThread]
 		static void Main()
 		{
 			string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -117,7 +118,7 @@ namespace BiUpdateHelper
 
 		private static void btnRegistryBackupNow_Click(object sender, EventArgs e)
 		{
-			RegistryBackup.BackupNow(BiUpdateHelperSettings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg",
+			RegistryBackup.BackupNow(Program.settings.GetManualRegistryBackupLocation() + Path.DirectorySeparatorChar + "BI_REG_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".reg",
 									Program.settings.bi32OnWin64);
 		}
 
