@@ -41,10 +41,14 @@
 			this.txtRegistryBackupsPath = new System.Windows.Forms.TextBox();
 			this.label3 = new System.Windows.Forms.Label();
 			this.btnRegistryBackupsBrowse = new System.Windows.Forms.Button();
+			this.btnUpdateBackupsBrowse = new System.Windows.Forms.Button();
+			this.label4 = new System.Windows.Forms.Label();
+			this.txtUpdateBackupsPath = new System.Windows.Forms.TextBox();
 			this.btnViewRegistryBackups = new System.Windows.Forms.Button();
 			this.label2 = new System.Windows.Forms.Label();
 			this.btnLaunch32BitRegedit = new System.Windows.Forms.Button();
 			this.folderBrowserRegistryBackups = new System.Windows.Forms.FolderBrowserDialog();
+			this.folderBrowserUpdateBackups = new System.Windows.Forms.FolderBrowserDialog();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -83,10 +87,10 @@
 			// cb_logVerbose
 			// 
 			this.cb_logVerbose.AutoSize = true;
-			this.cb_logVerbose.Location = new System.Drawing.Point(12, 181);
+			this.cb_logVerbose.Location = new System.Drawing.Point(12, 229);
 			this.cb_logVerbose.Name = "cb_logVerbose";
 			this.cb_logVerbose.Size = new System.Drawing.Size(205, 17);
-			this.cb_logVerbose.TabIndex = 6;
+			this.cb_logVerbose.TabIndex = 10;
 			this.cb_logVerbose.Text = "Log verbose (for debugging purposes)";
 			this.toolTip1.SetToolTip(this.cb_logVerbose, resources.GetString("cb_logVerbose.ToolTip"));
 			this.cb_logVerbose.UseVisualStyleBackColor = true;
@@ -102,10 +106,10 @@
 			// cb_includeRegistryWithUpdateBackup
 			// 
 			this.cb_includeRegistryWithUpdateBackup.AutoSize = true;
-			this.cb_includeRegistryWithUpdateBackup.Location = new System.Drawing.Point(12, 85);
+			this.cb_includeRegistryWithUpdateBackup.Location = new System.Drawing.Point(12, 133);
 			this.cb_includeRegistryWithUpdateBackup.Name = "cb_includeRegistryWithUpdateBackup";
 			this.cb_includeRegistryWithUpdateBackup.Size = new System.Drawing.Size(195, 17);
-			this.cb_includeRegistryWithUpdateBackup.TabIndex = 3;
+			this.cb_includeRegistryWithUpdateBackup.TabIndex = 5;
 			this.cb_includeRegistryWithUpdateBackup.Text = "Backup registry before each update";
 			this.toolTip1.SetToolTip(this.cb_includeRegistryWithUpdateBackup, resources.GetString("cb_includeRegistryWithUpdateBackup.ToolTip"));
 			this.cb_includeRegistryWithUpdateBackup.UseVisualStyleBackColor = true;
@@ -114,10 +118,10 @@
 			// cb_dailyRegistryBackups
 			// 
 			this.cb_dailyRegistryBackups.AutoSize = true;
-			this.cb_dailyRegistryBackups.Location = new System.Drawing.Point(12, 108);
+			this.cb_dailyRegistryBackups.Location = new System.Drawing.Point(12, 156);
 			this.cb_dailyRegistryBackups.Name = "cb_dailyRegistryBackups";
 			this.cb_dailyRegistryBackups.Size = new System.Drawing.Size(124, 17);
-			this.cb_dailyRegistryBackups.TabIndex = 4;
+			this.cb_dailyRegistryBackups.TabIndex = 6;
 			this.cb_dailyRegistryBackups.Text = "Daily registry backup";
 			this.toolTip1.SetToolTip(this.cb_dailyRegistryBackups, "(Default: enabled)\r\n\r\nIf enabled, Blue Iris\'s registry settings will be backed up" +
         " \r\neach day and stored alongside BiUpdateHelper.");
@@ -127,10 +131,10 @@
 			// cb_BI32Win64
 			// 
 			this.cb_BI32Win64.AutoSize = true;
-			this.cb_BI32Win64.Location = new System.Drawing.Point(12, 204);
+			this.cb_BI32Win64.Location = new System.Drawing.Point(12, 252);
 			this.cb_BI32Win64.Name = "cb_BI32Win64";
 			this.cb_BI32Win64.Size = new System.Drawing.Size(183, 17);
-			this.cb_BI32Win64.TabIndex = 7;
+			this.cb_BI32Win64.TabIndex = 11;
 			this.cb_BI32Win64.Text = "32 bit Blue Iris on 64 bit Windows";
 			this.toolTip1.SetToolTip(this.cb_BI32Win64, "You should only need to check this box if you want this \r\nprogram to work with 32" +
         " bit Blue Iris on 64 bit Windows.");
@@ -141,10 +145,10 @@
 			// 
 			this.txtRegistryBackupsPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.txtRegistryBackupsPath.Location = new System.Drawing.Point(12, 155);
+			this.txtRegistryBackupsPath.Location = new System.Drawing.Point(12, 203);
 			this.txtRegistryBackupsPath.Name = "txtRegistryBackupsPath";
 			this.txtRegistryBackupsPath.Size = new System.Drawing.Size(275, 20);
-			this.txtRegistryBackupsPath.TabIndex = 10;
+			this.txtRegistryBackupsPath.TabIndex = 8;
 			this.toolTip1.SetToolTip(this.txtRegistryBackupsPath, "The RegistryBackups folder will be \r\ncreated as a subdirectory of this.\r\n\r\nIf emp" +
         "ty or otherwise invalid, then \r\nthe RegistryBackups folder will be \r\nlocated nex" +
         "t to the BiUpdateHelper\r\nexecutable.");
@@ -154,7 +158,7 @@
 			// 
 			this.label3.AutoSize = true;
 			this.label3.BackColor = System.Drawing.Color.Transparent;
-			this.label3.Location = new System.Drawing.Point(12, 136);
+			this.label3.Location = new System.Drawing.Point(12, 184);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(152, 13);
 			this.label3.TabIndex = 11;
@@ -166,10 +170,10 @@
 			// btnRegistryBackupsBrowse
 			// 
 			this.btnRegistryBackupsBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.btnRegistryBackupsBrowse.Location = new System.Drawing.Point(293, 153);
+			this.btnRegistryBackupsBrowse.Location = new System.Drawing.Point(293, 201);
 			this.btnRegistryBackupsBrowse.Name = "btnRegistryBackupsBrowse";
 			this.btnRegistryBackupsBrowse.Size = new System.Drawing.Size(75, 23);
-			this.btnRegistryBackupsBrowse.TabIndex = 12;
+			this.btnRegistryBackupsBrowse.TabIndex = 9;
 			this.btnRegistryBackupsBrowse.Text = "browse";
 			this.toolTip1.SetToolTip(this.btnRegistryBackupsBrowse, "The RegistryBackups folder will be \r\ncreated as a subdirectory of this.\r\n\r\nIf emp" +
         "ty or otherwise invalid, then \r\nthe RegistryBackups folder will be \r\nlocated nex" +
@@ -177,19 +181,59 @@
 			this.btnRegistryBackupsBrowse.UseVisualStyleBackColor = true;
 			this.btnRegistryBackupsBrowse.Click += new System.EventHandler(this.btnRegistryBackupsBrowse_Click);
 			// 
+			// btnUpdateBackupsBrowse
+			// 
+			this.btnUpdateBackupsBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnUpdateBackupsBrowse.Location = new System.Drawing.Point(293, 103);
+			this.btnUpdateBackupsBrowse.Name = "btnUpdateBackupsBrowse";
+			this.btnUpdateBackupsBrowse.Size = new System.Drawing.Size(75, 23);
+			this.btnUpdateBackupsBrowse.TabIndex = 4;
+			this.btnUpdateBackupsBrowse.Text = "browse";
+			this.toolTip1.SetToolTip(this.btnUpdateBackupsBrowse, "All Blue Iris update files will be \r\nsaved into this folder.\r\n\r\nIf empty or other" +
+        "wise invalid, then \r\nthe update files will be saved in the \r\nsame folder as Blue" +
+        "Iris.exe.");
+			this.btnUpdateBackupsBrowse.UseVisualStyleBackColor = true;
+			this.btnUpdateBackupsBrowse.Click += new System.EventHandler(this.btnUpdateBackupsBrowse_Click);
+			// 
+			// label4
+			// 
+			this.label4.AutoSize = true;
+			this.label4.BackColor = System.Drawing.Color.Transparent;
+			this.label4.Location = new System.Drawing.Point(12, 86);
+			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(149, 13);
+			this.label4.TabIndex = 14;
+			this.label4.Text = "Custom update backups path:\r\n";
+			this.toolTip1.SetToolTip(this.label4, "All Blue Iris update files will be \r\nsaved into this folder.\r\n\r\nIf empty or other" +
+        "wise invalid, then \r\nthe update files will be saved in the \r\nsame folder as Blue" +
+        "Iris.exe.");
+			// 
+			// txtUpdateBackupsPath
+			// 
+			this.txtUpdateBackupsPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.txtUpdateBackupsPath.Location = new System.Drawing.Point(12, 105);
+			this.txtUpdateBackupsPath.Name = "txtUpdateBackupsPath";
+			this.txtUpdateBackupsPath.Size = new System.Drawing.Size(275, 20);
+			this.txtUpdateBackupsPath.TabIndex = 3;
+			this.toolTip1.SetToolTip(this.txtUpdateBackupsPath, "All Blue Iris update files will be \r\nsaved into this folder.\r\n\r\nIf empty or other" +
+        "wise invalid, then \r\nthe update files will be saved in the \r\nsame folder as Blue" +
+        "Iris.exe.");
+			this.txtUpdateBackupsPath.TextChanged += new System.EventHandler(this.txtUpdateBackupsPath_TextChanged);
+			// 
 			// btnViewRegistryBackups
 			// 
-			this.btnViewRegistryBackups.Location = new System.Drawing.Point(174, 104);
+			this.btnViewRegistryBackups.Location = new System.Drawing.Point(174, 152);
 			this.btnViewRegistryBackups.Name = "btnViewRegistryBackups";
 			this.btnViewRegistryBackups.Size = new System.Drawing.Size(194, 23);
-			this.btnViewRegistryBackups.TabIndex = 5;
+			this.btnViewRegistryBackups.TabIndex = 7;
 			this.btnViewRegistryBackups.Text = "View Registry Backups";
 			this.btnViewRegistryBackups.UseVisualStyleBackColor = true;
 			this.btnViewRegistryBackups.Click += new System.EventHandler(this.btnViewRegistryBackups_Click);
 			// 
 			// label2
 			// 
-			this.label2.Location = new System.Drawing.Point(12, 224);
+			this.label2.Location = new System.Drawing.Point(12, 272);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(256, 57);
 			this.label2.TabIndex = 8;
@@ -198,10 +242,10 @@
 			// 
 			// btnLaunch32BitRegedit
 			// 
-			this.btnLaunch32BitRegedit.Location = new System.Drawing.Point(274, 224);
+			this.btnLaunch32BitRegedit.Location = new System.Drawing.Point(274, 272);
 			this.btnLaunch32BitRegedit.Name = "btnLaunch32BitRegedit";
 			this.btnLaunch32BitRegedit.Size = new System.Drawing.Size(94, 41);
-			this.btnLaunch32BitRegedit.TabIndex = 9;
+			this.btnLaunch32BitRegedit.TabIndex = 12;
 			this.btnLaunch32BitRegedit.Text = "Launch 32 bit regedit";
 			this.btnLaunch32BitRegedit.UseVisualStyleBackColor = true;
 			this.btnLaunch32BitRegedit.Click += new System.EventHandler(this.btnLaunch32BitRegedit_Click);
@@ -210,7 +254,10 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(380, 283);
+			this.ClientSize = new System.Drawing.Size(380, 330);
+			this.Controls.Add(this.btnUpdateBackupsBrowse);
+			this.Controls.Add(this.label4);
+			this.Controls.Add(this.txtUpdateBackupsPath);
 			this.Controls.Add(this.btnRegistryBackupsBrowse);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.txtRegistryBackupsPath);
@@ -251,5 +298,9 @@
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Button btnRegistryBackupsBrowse;
 		private System.Windows.Forms.FolderBrowserDialog folderBrowserRegistryBackups;
+		private System.Windows.Forms.Button btnUpdateBackupsBrowse;
+		private System.Windows.Forms.Label label4;
+		private System.Windows.Forms.TextBox txtUpdateBackupsPath;
+		private System.Windows.Forms.FolderBrowserDialog folderBrowserUpdateBackups;
 	}
 }

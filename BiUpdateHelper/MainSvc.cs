@@ -159,7 +159,8 @@ namespace BiUpdateHelper
 									if (versionInfo == null)
 										continue; // BI is probably not running
 
-									FileInfo targetUpdateFile = new FileInfo(mapping.dirPath + "update" + versionInfo.cpu_32_64 + "_" + versionInfo.version + ".exe");
+									string blueIrisFolderPath = Program.settings.GetUpdateBackupLocation(mapping.dirPath);
+									FileInfo targetUpdateFile = new FileInfo(Path.Combine(blueIrisFolderPath, "update" + versionInfo.cpu_32_64 + "_" + versionInfo.version + ".exe"));
 									if (targetUpdateFile.Exists)
 									{
 										// A backed-up update file for the active Blue Iris version already exists, so we should do nothing now

@@ -35,6 +35,7 @@ namespace BiUpdateHelper
 			cb_logVerbose.Checked = settings.logVerbose;
 			cb_BI32Win64.Checked = settings.bi32OnWin64;
 			txtRegistryBackupsPath.Text = settings.registryBackupsFolderPath;
+			txtUpdateBackupsPath.Text = settings.updateBackupsPath;
 			isLoaded = true;
 		}
 
@@ -54,6 +55,7 @@ namespace BiUpdateHelper
 				settings.logVerbose = cb_logVerbose.Checked;
 				settings.bi32OnWin64 = cb_BI32Win64.Checked;
 				settings.registryBackupsFolderPath = txtRegistryBackupsPath.Text;
+				settings.updateBackupsPath = txtUpdateBackupsPath.Text;
 				RegistryUtil.Force32BitRegistryAccess = settings.bi32OnWin64;
 
 				settings.Save();
@@ -61,6 +63,11 @@ namespace BiUpdateHelper
 		}
 
 		private void txtRegistryBackupsPath_TextChanged(object sender, EventArgs e)
+		{
+			SaveSettings();
+		}
+
+		private void txtUpdateBackupsPath_TextChanged(object sender, EventArgs e)
 		{
 			SaveSettings();
 		}
@@ -80,9 +87,22 @@ namespace BiUpdateHelper
 		{
 			if (!string.IsNullOrEmpty(txtRegistryBackupsPath.Text))
 				folderBrowserRegistryBackups.SelectedPath = txtRegistryBackupsPath.Text;
+			if (string.IsNullOrWhiteSpace(folderBrowserRegistryBackups.SelectedPath))
+				folderBrowserRegistryBackups.SelectedPath = Globals.ApplicationRoot;
 			DialogResult dr = folderBrowserRegistryBackups.ShowDialog();
 			if (dr == DialogResult.OK)
 				txtRegistryBackupsPath.Text = folderBrowserRegistryBackups.SelectedPath;
+		}
+
+		private void btnUpdateBackupsBrowse_Click(object sender, EventArgs e)
+		{
+			if (!string.IsNullOrEmpty(txtUpdateBackupsPath.Text))
+				folderBrowserUpdateBackups.SelectedPath = txtUpdateBackupsPath.Text;
+			if (string.IsNullOrWhiteSpace(folderBrowserUpdateBackups.SelectedPath))
+				folderBrowserUpdateBackups.SelectedPath = Globals.ApplicationRoot;
+			DialogResult dr = folderBrowserUpdateBackups.ShowDialog();
+			if (dr == DialogResult.OK)
+				txtUpdateBackupsPath.Text = folderBrowserUpdateBackups.SelectedPath;
 		}
 	}
 }

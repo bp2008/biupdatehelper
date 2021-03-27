@@ -24,6 +24,7 @@ namespace BiUpdateHelper
 		public string secret = "";
 		public long lastUsageReportAt = 0;
 		public string registryBackupsFolderPath = "";
+		public string updateBackupsPath = "";
 
 		/// <summary>
 		/// Returns the absolute path to the RegistryBackups/Daily folder, not including trailing Path.DirectorySeparatorChar.  This method will also create that directory if it does not exist.
@@ -77,7 +78,7 @@ namespace BiUpdateHelper
 				}
 				catch (Exception ex)
 				{
-					Logger.Debug(ex);
+					Logger.Debug(ex, "registryBackupsFolderPath: " + registryBackupsFolderPath);
 				}
 			}
 			// Fallback to application directory.
@@ -86,6 +87,29 @@ namespace BiUpdateHelper
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
 			return path;
+		}
+		/// <summary>
+		/// Returns the absolute path to the folder where Blue Iris update files should be stored.  This method will also create that directory if it does not exist.
+		/// </summary>
+		/// <returns></returns>
+		public string GetUpdateBackupLocation(string blueIrisFolderPath)
+		{
+			if (!string.IsNullOrWhiteSpace(updateBackupsPath))
+			{
+				try
+				{
+					if (!Directory.Exists(updateBackupsPath))
+						Directory.CreateDirectory(updateBackupsPath);
+					if (Directory.Exists(updateBackupsPath))
+						return updateBackupsPath;
+				}
+				catch (Exception ex)
+				{
+					Logger.Debug(ex, "updateBackupsPath: " + updateBackupsPath);
+				}
+			}
+			// Fallback to blueIrisFolderPath.
+			return blueIrisFolderPath;
 		}
 	}
 }
