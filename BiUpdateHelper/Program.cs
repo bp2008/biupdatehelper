@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using BlueIrisRegistryReader;
 using BPUtil;
@@ -18,7 +19,6 @@ namespace BiUpdateHelper
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
-		[STAThread]
 		static void Main()
 		{
 			string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -63,7 +63,13 @@ namespace BiUpdateHelper
 				ButtonDefinition btnPerfData = new ButtonDefinition("Performance Data", btnPerfData_Click);
 				ButtonDefinition[] customButtons = new ButtonDefinition[] { btnRegKey, btnSettings, btnCameraConfigLinks, btnRegistryBackupNow, btnPerfData };
 
-				System.Windows.Forms.Application.Run(new ServiceManager(Title, ServiceName, customButtons));
+				Thread thrGUI = new Thread(() =>
+				{
+					System.Windows.Forms.Application.Run(new ServiceManager(Title, ServiceName, customButtons));
+				});
+				thrGUI.SetApartmentState(ApartmentState.STA);
+				thrGUI.Start();
+				thrGUI.Join();
 			}
 			else
 			{

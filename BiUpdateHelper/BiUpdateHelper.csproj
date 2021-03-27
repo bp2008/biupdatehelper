@@ -130,6 +130,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(SolutionDir)LICENSE" "$(TargetDir)LICENSE"</PostBuildEvent>
+    <PostBuildEvent>copy /Y "$(SolutionDir)LICENSE" "$(TargetDir)LICENSE"
+if $(ConfigurationName) == Release (
+  del Newtonsoft.Json.xml
+  del BPUtil.xml
+  del BlueIrisRegistryReader.xml
+  del BiUpdateHelper.exe.config
+)</PostBuildEvent>
   </PropertyGroup>
 </Project>

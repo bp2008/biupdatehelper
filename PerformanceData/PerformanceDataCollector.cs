@@ -207,7 +207,7 @@ namespace BiUpdateHelper.PerformanceData
 				record.CpuMHz = NumberUtil.ParseInt(c.cpu.maxClockSpeed);
 			}
 
-			record.HelperVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+			record.HelperVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString();
 			record.HwAccel = (byte)c.global.HardwareAcceleration;
 			record.ServiceMode = c.global.ServiceMode;
 			record.LivePreviewFPS = (short)c.global.LivePreviewFPS;
